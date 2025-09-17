@@ -1,0 +1,92 @@
+package rules.airRules
+
+import com.ftn.model.PollutantMeasurment;
+import com.ftn.model.AirQualityStatus;
+import com.ftn.model.AirQualityCategory;
+import com.ftn.model.UserProfile;
+import com.ftn.model.UserCategory;
+
+rule "PM2.5 Kategorizacija"
+when
+    $m : PollutantMeasurment()
+then
+    if($m.getPm25() <= 15) $m.setPm25Status(AirQualityCategory.DOBAR);
+    else if($m.getPm25() <= 35) $m.setPm25Status(AirQualityCategory.UMEREN);
+    else if($m.getPm25() <= 55) $m.setPm25Status(AirQualityCategory.LOS);
+    else $m.setPm25Status(AirQualityCategory.OPASAN);
+end
+
+rule "PM10 Kategorizacija"
+when
+    $m : PollutantMeasurment()
+then
+    if($m.getPm10() <= 25) $m.setPm10Status(AirQualityCategory.DOBAR);
+    else if($m.getPm10() <= 50) $m.setPm10Status(AirQualityCategory.UMEREN);
+    else if($m.getPm10() <= 100) $m.setPm10Status(AirQualityCategory.LOS);
+    else $m.setPm10Status(AirQualityCategory.OPASAN);
+end
+
+rule "NO2 Kategorizacija"
+when
+    $m : PollutantMeasurment()
+then
+    if($m.getNo2() <= 40) $m.setNo2Status(AirQualityCategory.DOBAR);
+    else if($m.getNo2() <= 90) $m.setNo2Status(AirQualityCategory.UMEREN);
+    else if($m.getNo2() <= 180) $m.setNo2Status(AirQualityCategory.LOS);
+    else $m.setNo2Status(AirQualityCategory.OPASAN);
+end
+
+rule "Kombinovanje i preporuka"
+when
+    $m : PollutantMeasurment($pm25Status : pm25Status, $pm10Status : pm10Status, $no2Status : no2Status)
+    $user : UserProfile($type : userType)
+    $status : AirQualityStatus()
+then
+    AirQualityCategory finalCategory = AirQualityCategory.DOBAR;
+
+    // Najgora kategorija među PM2.5, PM10 i NO2
+    if($pm25Status == AirQualityCategory.OPASAN || $pm10Status == AirQualityCategory.OPASAN || $no2Status == AirQualityCategory.OPASAN)
+        finalCategory = AirQualityCategory.OPASAN;
+    else if($pm25Status == AirQualityCategory.LOS || $pm10Status == AirQualityCategory.LOS || $no2Status == AirQualityCategory.LOS)
+        finalCategory = AirQualityCategory.LOS;
+    else if($pm25Status == AirQualityCategory.UMEREN || $pm10Status == AirQualityCategory.UMEREN || $no2Status == AirQualityCategory.UMEREN)
+        finalCategory = AirQualityCategory.UMEREN;
+
+    $status.setCategory(finalCategory);
+    $status.setExplanation("PM2.5=" + $pm25Status + ", PM10=" + $pm10Status + ", NO2=" + $no2Status);
+
+    // Preporuka po tipu korisnika
+    if(finalCategory == AirQualityCategory.LOS && $type == UserCategory.DETE) {
+        $status.setRecommendation("Ostati unutra");
+    } else if(finalCategory == AirQualityCategory.OPASAN) {
+        $status.setRecommendation("Izbegavati napolje, koristiti masku");
+    } else {
+        $status.setRecommendation("Bez posebnih mera");
+    }
+end
+
+// rule "Kombinovanje i preporuka"
+// when
+//     $m : PollutantMeasurment($pm25Status : pm25Status, $pm10Status : pm10Status)
+//     $user : UserProfile($type : userType)
+//     $status : AirQualityStatus()
+// then
+//     // String finalCategory = "DOBAR";
+//     AirQualityCategory finalCategory = AirQualityCategory.DOBAR;
+//     // Najgora kategorija
+//     if($pm25Status == AirQualityCategory.OPASAN || $pm10Status == AirQualityCategory.OPASAN) finalCategory = AirQualityCategory.OPASAN;
+//     else if($pm25Status == AirQualityCategory.LOS || $pm10Status == AirQualityCategory.LOS) finalCategory = AirQualityCategory.LOS;
+//     else if($pm25Status == AirQualityCategory.UMEREN || $pm10Status == AirQualityCategory.UMEREN) finalCategory = AirQualityCategory.UMEREN;
+
+//     $status.setCategory(finalCategory);
+//     $status.setExplanation("PM2.5=" + $pm25Status + ", PM10=" + $pm10Status);
+
+//     // Preporuka po tipu korisnika
+//     if(finalCategory == AirQualityCategory.LOS && $type == UserCategory.DETE) {
+//         $status.setRecommendation("Ostati unutra");
+//     } else if(finalCategory == AirQualityCategory.OPASAN) {
+//         $status.setRecommendation("Izbegavati napolje, koristiti masku");
+//     } else {
+//         $status.setRecommendation("Bez posebnih mera");
+//     }
+// end
