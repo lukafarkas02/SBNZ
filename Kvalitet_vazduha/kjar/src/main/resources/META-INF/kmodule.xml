@@ -2,5 +2,7 @@
     <kbase name="rulesAir" packages="airRules">
         <ksession name="k-session-air"/>
     </kbase>
-    
+    <kbase name="rulesCEP" packages="cepRules" eventProcessingMode="stream">
+        <ksession name="k-session-cep"/>
+    </kbase>
 </kmodule>

@@ -8,7 +8,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "com.ftn")
 public class Application implements CommandLineRunner {
 
     public static void main(String[] args) {
@@ -31,7 +31,7 @@ public class Application implements CommandLineRunner {
 	{
 	
 		// pokretati odvojeno svaku main klasu
-		Test.main();
+		// Test.main();
 		
 		//GlobalExample.main();
 		

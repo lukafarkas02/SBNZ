@@ -4,5 +4,7 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <kbase name="rulesAir" packages="rules/airRules">
         <ksession name="k-session-air"/>
     </kbase>
-    
+    <kbase name="rulesCEP" packages="rules/cepRules" eventProcessingMode="stream">
+        <ksession name="k-session-cep"/>
+    </kbase>
 </kmodule>

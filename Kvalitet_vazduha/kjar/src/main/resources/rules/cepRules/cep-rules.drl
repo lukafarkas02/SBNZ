@@ -1,0 +1,44 @@
+package rules.cepRules
+
+import com.ftn.model.AirPollutionEvent;
+import com.ftn.model.AirQualityStatus;
+import com.ftn.model.AirQualityCategory;
+
+declare AirPollutionEvent
+    @role( event )
+    @timestamp( timestamp )
+end
+
+rule "Kontinuirano visok PM2.5"
+when
+    accumulate(
+        $e : AirPollutionEvent(pm25 > 55) over window:time(10m),
+        $count : count($e)
+    )
+    eval($count >= 1) // npr. 3 merenja zaredom u poslednjih 30m
+    $status : AirQualityStatus()
+then
+    System.out.println(">>> Pravilo aktivirano!");
+    $status.setCategory(AirQualityCategory.OPASAN);
+    $status.setExplanation("Kontinuirano visoka koncentracija PM2.5 poslednjih 30 minuta");
+    $status.setRecommendation("Hitno upozorenje: izbegavati boravak napolju, obavezno maske!");
+    update($status);
+    System.out.println(">>> CEP pravilo aktivirano: kontinuirano opasan vazduh");
+end
+
+rule "Opasan vazduh duže od 6 sati"
+when
+    // gledamo sve evente u poslednjih 6h
+    accumulate(
+        $e : AirPollutionEvent(pm25 > 55) over window:time(6h),
+        $count : count($e)
+    )
+    eval($count > 3)  // znači da u poslednjih 6h NISMO imali zdrav vazduh
+    $status : AirQualityStatus()
+then
+    System.out.println(">>> Upozorenje institucijama: vazduh je opasan duže od 6h!");
+    $status.setCategory(AirQualityCategory.OPASAN);
+    $status.setExplanation("Vazduh opasan neprekidno duže od 6 sati");
+    $status.setRecommendation("Obavestiti škole i vrtiće, obavezne zaštitne mere");
+    update($status);
+end
