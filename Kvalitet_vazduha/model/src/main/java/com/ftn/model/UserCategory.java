@@ -1,8 +1,8 @@
 package com.ftn.model;
 
 public enum UserCategory {
-    DETE,
-    STARIJI,
-    HRONICNI,
-    INSTITUCIJA
+    CHILD,
+    ELDERLY,
+    CHRONIC,
+    PREGNANT
 }

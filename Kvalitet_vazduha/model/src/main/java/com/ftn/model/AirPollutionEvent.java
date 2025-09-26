@@ -1,44 +1,156 @@
 package com.ftn.model;
 
-import com.ftn.model.WindCategory;
+import java.time.LocalDateTime;
 
 public class AirPollutionEvent {
+
     private double pm25;
     private double pm10;
     private double no2;
-    private double windSpeed;
-    private WindCategory windCategory;
-    private long timestamp; // promenjeno sa LocalDateTime na long
+    private double o3;
+    private double co2;
 
-    public AirPollutionEvent(double pm25, double pm10, double no2, double windSpeed, WindCategory windCategory, long timestamp) {
+    private double windSpeed;         // m/s
+    private boolean precipitation;    // true = ima padavina, false = nema
+    private double temperature;       // °C
+    private double humidity;          // %
+    private double pressure;          // hPa
+
+    private LocalDateTime timestamp;  // vreme merenja
+
+    // === Konstruktor bez argumenata (potreban za Drools) ===
+    public AirPollutionEvent() {
+    }
+
+    // === Konstruktor sa svim poljima ===
+    public AirPollutionEvent(double pm25, double pm10, double no2, double o3, double co2,
+                             double windSpeed, boolean precipitation,
+                             double temperature, double humidity, double pressure,
+                             LocalDateTime timestamp) {
         this.pm25 = pm25;
         this.pm10 = pm10;
         this.no2 = no2;
+        this.o3 = o3;
+        this.co2 = co2;
         this.windSpeed = windSpeed;
-        this.windCategory = windCategory;
+        this.precipitation = precipitation;
+        this.temperature = temperature;
+        this.humidity = humidity;
+        this.pressure = pressure;
         this.timestamp = timestamp;
     }
 
-    public AirPollutionEvent() { }
+     public AirPollutionEvent(double pm25, double pm10, double no2, double windSpeed, LocalDateTime localDate) {
+        this.pm10 = pm10;
+        this.pm25 = pm25;
+        this.no2 = no2;
+        this.windSpeed = windSpeed;
+        this.timestamp = localDate;
+     }
 
-    // Getteri
-    public double getPm25() { return pm25; }
-    public double getPm10() { return pm10; }
-    public double getNo2() { return no2; }
-    public long getTimestamp() { return timestamp; }
-    public WindCategory getCategory() { return windCategory; }
-    public double getWindSpeed() { return windSpeed; }
+    // === Getteri i setteri ===
+    public double getPm25() {
+        return pm25;
+    }
 
-    // Setteri
-    public void setPm25(double pm25) { this.pm25 = pm25; }
-    public void setPm10(double pm10) { this.pm10 = pm10; }
-    public void setNo2(double no2) { this.no2 = no2; }
-    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
-    public void setCategory(WindCategory windCategory) { this.windCategory = windCategory; }
-    public void setWindSpeed(double windSpeed) { this.windSpeed = windSpeed; }
+    public void setPm25(double pm25) {
+        this.pm25 = pm25;
+    }
+
+    public double getPm10() {
+        return pm10;
+    }
+
+    public void setPm10(double pm10) {
+        this.pm10 = pm10;
+    }
+
+    public double getNo2() {
+        return no2;
+    }
+
+    public void setNo2(double no2) {
+        this.no2 = no2;
+    }
+
+    public double getO3() {
+        return o3;
+    }
+
+    public void setO3(double o3) {
+        this.o3 = o3;
+    }
+
+    public double getCo2() {
+        return co2;
+    }
+
+    public void setCo2(double co2) {
+        this.co2 = co2;
+    }
+
+    public double getWindSpeed() {
+        return windSpeed;
+    }
+
+    public void setWindSpeed(double windSpeed) {
+        this.windSpeed = windSpeed;
+    }
+
+    public boolean isPrecipitation() {
+        return precipitation;
+    }
+
+    public void setPrecipitation(boolean precipitation) {
+        this.precipitation = precipitation;
+    }
+
+    public double getTemperature() {
+        return temperature;
+    }
+
+    public void setTemperature(double temperature) {
+        this.temperature = temperature;
+    }
+
+    public double getHumidity() {
+        return humidity;
+    }
+
+    public void setHumidity(double humidity) {
+        this.humidity = humidity;
+    }
+
+    public double getPressure() {
+        return pressure;
+    }
+
+    public void setPressure(double pressure) {
+        this.pressure = pressure;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
 
     @Override
     public String toString() {
-        return "AirPollutionEvent [pm25=" + pm25 + ", pm10=" + pm10 + ", no2=" + no2 + ", timestamp=" + timestamp + ", windSpeed= " + windSpeed + "]";
+        return "AirPollutionEvent{" +
+                "pm25=" + pm25 +
+                ", pm10=" + pm10 +
+                ", no2=" + no2 +
+                ", o3=" + o3 +
+                ", co2=" + co2 +
+                ", windSpeed=" + windSpeed +
+                ", precipitation=" + precipitation +
+                ", temperature=" + temperature +
+                ", humidity=" + humidity +
+                ", pressure=" + pressure +
+                ", timestamp=" + timestamp +
+                '}';
     }
 }

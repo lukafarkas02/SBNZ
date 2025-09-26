@@ -38,7 +38,7 @@ public class Test{
 
                 KieSession kSession = KnowledgeSessionHelper.getStatefulKnowledgeSession(kc, "k-session-air");
 
-                UserProfile user = new UserProfile(UserCategory.DETE); // npr. DETE
+                UserProfile user = new UserProfile(UserCategory.CHILD); // npr. DETE
                 AirQualityStatus status = new AirQualityStatus();
 
                 // Insert facts

@@ -7,4 +7,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <kbase name="rulesCEP" packages="rules/cepRules" eventProcessingMode="stream">
         <ksession name="k-session-cep" type="stateful" clockType="realtime"/>
     </kbase>
+    
+    <kbase name="backward-kbase" packages="rules/backward">
+        <ksession name="backward-ksession"/>
+    </kbase>
 </kmodule>

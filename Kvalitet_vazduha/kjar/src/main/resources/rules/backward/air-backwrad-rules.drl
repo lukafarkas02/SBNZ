@@ -1,0 +1,159 @@
+package rules.backward
+
+import java.util.Arrays;
+import java.util.List;
+
+import com.ftn.model.AirPollutionEvent;
+import com.ftn.model.AirQualityStatus;
+import com.ftn.model.AirQualityCategory;
+import com.ftn.model.UserProfile;
+import com.ftn.model.UserCategory;
+
+// =====================================================================
+// Deklaracija pomoćne strukture za rekurzivne zavisnosti (kao kod druga)
+// =====================================================================
+declare HypothesisDependency
+    conclusion     : String
+    prerequisites  : java.util.List
+end
+
+// =====================================================================
+// Inicijalizacija stabla zavisnosti za "Opasan vazduh" i preporuke
+// Root hipoteza: "IssueAlertOpasan" (izdati upozorenje: OPASAN)
+// Slojevi niže: kombinacije polutanata + vremenskih uslova + profila
+// =====================================================================
+rule "Init dependencies for Air Quality backward"
+salience 100
+when
+    not( HypothesisDependency() )
+then
+    System.out.println(">> Init backward dependencies for Air Quality...");
+
+    // --- ROOT: izdati upozorenje (opasan) ---
+    // tražimo: (SeverePollution OR MultiPollutantHigh) AND (UnfavorableWeather) 
+    // i po mogućnosti SensitiveUser za jače preporuke
+    insert( new HypothesisDependency(
+        "IssueAlertOpasan",
+        Arrays.asList("OverallStatusOpasan", "UnfavorableWeather")
+    ) );
+
+    // Za personalizovanu eskalaciju: root+SensitiveUser => "StrongProtectAdvice"
+    insert( new HypothesisDependency(
+        "StrongProtectAdvice",
+        Arrays.asList("IssueAlertOpasan", "SensitiveUser")
+    ) );
+
+    // --- “Opasan” status izvođen iz polutanata ---
+    insert( new HypothesisDependency(
+        "OverallStatusOpasan",
+        Arrays.asList("SeverePollution") // ili "MultiPollutantHigh"
+    ) );
+
+    // Jedan jako visok polutant dovoljan
+    insert( new HypothesisDependency(
+        "SeverePollution",
+        Arrays.asList("PM25_Opasan_OR_PM10_Opasan_OR_NO2_Opasan_OR_O3_Opasan")
+    ) );
+
+    // Vremenski uslovi koji pogoršavaju disperziju
+    insert( new HypothesisDependency(
+        "UnfavorableWeather",
+        Arrays.asList("LowWind_OR_NoPrecip")
+    ) );
+
+    // --- Sensitive user (profil) ---
+    insert( new HypothesisDependency(
+        "SensitiveUser",
+        Arrays.asList("IsChild_OR_Elderly_OR_Chronic_OR_Pregnant")
+    ) );
+end
+
+// =====================================================================
+// REKURZIVNA PROVERA: bazni dokazi su direktno iz činjenica (fakta)
+// ili se hipoteza dokazuje tako što su sve njene pretpostavke dokazane.
+// =====================================================================
+query proveHypothesis(String $h)
+    // -------------------- Bazni (atomarni) uslovi --------------------
+    // POLUTANTI – pragovi iz specifikacije (PM2.5 / PM10 ± ekvivalenti)
+    (
+        // PM2.5
+        ( eval($h.equals("PM25_Opasan")) and exists AirPollutionEvent( pm25 > 55 ) ) or
+        ( eval($h.equals("PM25_Los"))    and exists AirPollutionEvent( pm25 > 35, pm25 <= 55 ) ) or
+        ( eval($h.equals("PM25_Umeren")) and exists AirPollutionEvent( pm25 > 15, pm25 <= 35 ) ) or
+        ( eval($h.equals("PM25_Dobar"))  and exists AirPollutionEvent( pm25 <= 15 ) ) or
+
+        // PM10
+        ( eval($h.equals("PM10_Opasan")) and exists AirPollutionEvent( pm10 > 100 ) ) or
+        ( eval($h.equals("PM10_Los"))    and exists AirPollutionEvent( pm10 > 50,  pm10 <= 100 ) ) or
+        ( eval($h.equals("PM10_Umeren")) and exists AirPollutionEvent( pm10 > 25,  pm10 <= 50 ) ) or
+        ( eval($h.equals("PM10_Dobar"))  and exists AirPollutionEvent( pm10 <= 25 ) ) or
+
+        // NO2 (primer granica – prilagodi tvojim forward pravilima ako već postoje)
+        ( eval($h.equals("NO2_Opasan"))  and exists AirPollutionEvent( no2 > 200 ) ) or
+        ( eval($h.equals("O3_Opasan"))   and exists AirPollutionEvent( o3  > 180 ) ) or
+
+        // Agregati baznih polutanata kao “OR” čvorovi
+        ( eval($h.equals("PM25_Opasan_OR_PM10_Opasan_OR_NO2_Opasan_OR_O3_Opasan"))
+              and ( exists AirPollutionEvent( pm25 > 55 ) 
+                 or exists AirPollutionEvent( pm10 > 100 )
+                 or exists AirPollutionEvent( no2  > 200 )
+                 or exists AirPollutionEvent( o3   > 180 ) ) ) or
+
+        // Vreme
+        ( eval($h.equals("LowWind"))     and exists AirPollutionEvent( windSpeed < 1.5 ) ) or
+        ( eval($h.equals("NoPrecip"))    and exists AirPollutionEvent( precipitation == false ) ) or
+        ( eval($h.equals("LowWind_OR_NoPrecip"))
+              and ( exists AirPollutionEvent( windSpeed < 1.5 )
+                 or exists AirPollutionEvent( precipitation == false ) ) ) or
+
+        // Profil korisnika (oslanja se na tvoju klasu UserProfile/UserCategory)
+        ( eval($h.equals("IsChild"))     and exists UserProfile( userType == UserCategory.CHILD ) ) or
+        ( eval($h.equals("IsElderly"))   and exists UserProfile( userType == UserCategory.ELDERLY ) ) or
+        ( eval($h.equals("IsChronic"))   and exists UserProfile( userType == UserCategory.CHRONIC ) ) or
+        ( eval($h.equals("IsPregnant"))  and exists UserProfile( userType == UserCategory.PREGNANT ) ) or
+        ( eval($h.equals("IsChild_OR_Elderly_OR_Chronic_OR_Pregnant"))
+              and exists UserProfile( userType in (UserCategory.CHILD, UserCategory.ELDERLY, UserCategory.CHRONIC, UserCategory.PREGNANT) ) )
+    )
+    or
+    // -------------------- Rekurzivni korak ---------------------------
+    (
+        $z : HypothesisDependency( conclusion == $h )
+        and not(
+            String($p: this) from $z.prerequisites
+            and
+            not proveHypothesis($p;)
+        )
+    )
+end
+
+// =====================================================================
+// Završna pravila: kad se hipoteze dokažu, upiši status + objašnjenje
+// =====================================================================
+
+// OPASAN – opšte upozorenje
+rule "Confirm OPASAN via backward reasoning"
+salience 10
+no-loop true
+when
+    proveHypothesis("IssueAlertOpasan";)
+    $status : AirQualityStatus()
+then
+    System.out.println(">> OPASAN (backward): visoki polutanti + nepovoljno vreme");
+    $status.setCategory(AirQualityCategory.OPASAN);
+    $status.setExplanation("Dokazano rekurzivno: (SeverePollution OR MultiPollutantHigh) i nepovoljno vreme.");
+    $status.setRecommendation("Ostanite u zatvorenom; koristite P2/P3 maske; izbegavajte napor napolju.");
+    update($status);
+end
+
+// OPASAN + rizične grupe – jača poruka
+rule "Personalized strong advice for sensitive users"
+salience 9
+no-loop true
+when
+    proveHypothesis("StrongProtectAdvice";)
+    $status : AirQualityStatus( category == AirQualityCategory.OPASAN )
+then
+    System.out.println(">> OPASAN (sensitive): posebne preporuke");
+    $status.setRecommendation($status.getRecommendation() + " Posebno za rizične grupe: izbegavati izlazak; konsultovati lekara ako se jave simptomi.");
+    update($status);
+end

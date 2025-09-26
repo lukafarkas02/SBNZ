@@ -5,4 +5,8 @@
     <kbase name="rulesCEP" packages="cepRules" eventProcessingMode="stream">
         <ksession name="k-session-cep" type="stateful" clockType="realtime"/>
     </kbase>
+
+        <kbase name="backward-kbase" packages="backward">
+        <ksession name="backward-ksession"/>
+    </kbase>
 </kmodule>

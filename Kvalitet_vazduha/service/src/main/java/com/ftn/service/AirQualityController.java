@@ -54,7 +54,7 @@ public class AirQualityController {
         System.out.println("REQ pm25=" + event.getPm25() + ", ts=" + ts + " windSpeed: " + event.getWindSpeed());
 
         // ubaci događaj u ISTU sesiju
-        this.kSession.insert(new AirPollutionEvent(event.getPm25(), event.getPm10(), event.getNo2(),event.getWindSpeed(), event.getCategory(), ts));
+        this.kSession.insert(new AirPollutionEvent(event.getPm25(), event.getPm10(), event.getNo2(),event.getWindSpeed(), event.getTimestamp()));
 
         // okini pravila
         this.kSession.fireAllRules();
