@@ -5,6 +5,6 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <ksession name="k-session-air"/>
     </kbase>
     <kbase name="rulesCEP" packages="rules/cepRules" eventProcessingMode="stream">
-        <ksession name="k-session-cep"/>
+        <ksession name="k-session-cep" type="stateful" clockType="realtime"/>
     </kbase>
 </kmodule>

@@ -3,6 +3,6 @@
         <ksession name="k-session-air"/>
     </kbase>
     <kbase name="rulesCEP" packages="cepRules" eventProcessingMode="stream">
-        <ksession name="k-session-cep"/>
+        <ksession name="k-session-cep" type="stateful" clockType="realtime"/>
     </kbase>
 </kmodule>
