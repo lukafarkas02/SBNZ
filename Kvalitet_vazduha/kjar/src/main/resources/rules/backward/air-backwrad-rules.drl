@@ -10,8 +10,6 @@ import com.ftn.model.UserProfile;
 import com.ftn.model.UserCategory;
 
 // =====================================================================
-// Deklaracija pomoćne strukture za rekurzivne zavisnosti (kao kod druga)
-// =====================================================================
 declare HypothesisDependency
     conclusion     : String
     prerequisites  : java.util.List

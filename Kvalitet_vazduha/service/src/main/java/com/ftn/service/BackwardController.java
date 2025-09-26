@@ -28,6 +28,7 @@ public class BackwardController {
 
         try {
             // 1) Činjenice
+            System.out.println(req);
             AirPollutionEvent e = new AirPollutionEvent();
             e.setPm25(req.pm25);
             e.setPm10(req.pm10);

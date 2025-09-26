@@ -16,7 +16,7 @@ public class AirPollutionEvent {
     private double humidity;          // %
     private double pressure;          // hPa
 
-    private LocalDateTime timestamp;  // vreme merenja
+    private long timestamp;  // vreme merenja
 
     // === Konstruktor bez argumenata (potreban za Drools) ===
     public AirPollutionEvent() {
@@ -26,7 +26,7 @@ public class AirPollutionEvent {
     public AirPollutionEvent(double pm25, double pm10, double no2, double o3, double co2,
                              double windSpeed, boolean precipitation,
                              double temperature, double humidity, double pressure,
-                             LocalDateTime timestamp) {
+                             long timestamp) {
         this.pm25 = pm25;
         this.pm10 = pm10;
         this.no2 = no2;
@@ -40,12 +40,12 @@ public class AirPollutionEvent {
         this.timestamp = timestamp;
     }
 
-     public AirPollutionEvent(double pm25, double pm10, double no2, double windSpeed, LocalDateTime localDate) {
+     public AirPollutionEvent(double pm25, double pm10, double no2, double windSpeed, long timestamp) {
         this.pm10 = pm10;
         this.pm25 = pm25;
         this.no2 = no2;
         this.windSpeed = windSpeed;
-        this.timestamp = localDate;
+        this.timestamp = timestamp;
      }
 
     // === Getteri i setteri ===
@@ -129,11 +129,11 @@ public class AirPollutionEvent {
         this.pressure = pressure;
     }
 
-    public LocalDateTime getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
