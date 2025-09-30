@@ -1,0 +1,50 @@
+<app-navigation></app-navigation>
+
+<div class="dashboard-container">
+
+  <h1>Welcome</h1>
+
+  <div class="cards-row">
+
+    <div class="card aqi-card">
+      <h2>Trenutni kvalitet vazduha</h2>
+
+      <div class="gauge-container">
+        <div class="gauge">
+            <div class="gauge-fill" [ngStyle] ="{'transform': 'rotate(' + gaugeRotation + 'deg)', 'background-color': gaugeColor}"></div>
+        </div>
+      </div>
+      
+      <p class="aqi-value">{{ aqiStatus }}</p>
+    </div>
+
+    <!-- Kartica 2: Grafikon -->
+    <div class="card chart-card">
+      <h2>Promena PM2.5 i PM10 u poslednjih 24h</h2>
+      <div class="chart-placeholder">[Ovde ide linijski grafikon]</div>
+    </div>
+
+    <!-- Kartica 3: Tabela polutanata -->
+    <div class="card pollutants-card">
+      <h2>Trenutne vrednosti polutanata</h2>
+      <table>
+        <tr>
+          <th>Polutant</th>
+          <th>Vrednost</th>
+        </tr>
+        <tr *ngFor="let p of pollutants">
+          <td>{{ p.name }}</td>
+          <td>{{ p.value }}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Upozorenja / Notifikacije -->
+  <div class="alerts">
+    <h2>Upozorenja</h2>
+    <ul>
+      <li *ngFor="let alert of alerts">{{ alert }}</li>
+    </ul>
+  </div>
+</div>

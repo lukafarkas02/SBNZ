@@ -1,0 +1,105 @@
+.dashboard-container {
+  padding: 1rem;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.cards-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background: #f5f5f5;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  flex: 1;
+}
+
+.aqi-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.gauge-placeholder,
+.chart-placeholder {
+  height: 150px;
+  background: #ddd;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pollutants-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pollutants-card th, .pollutants-card td {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.alerts {
+  background: #ffe5e5;
+  padding: 1rem;
+  border-radius: 10px;
+}
+
+.aqi-card {
+  text-align: center;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #f4f4f4;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.gauge-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.gauge {
+  position: relative;
+  width: 150px;
+  height: 75px;
+  border-top-left-radius: 150px;
+  border-top-right-radius: 150px;
+  background-color: #ddd;
+  overflow: hidden;
+}
+
+.gauge-fill {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 4px;
+  height: 100%;
+  transform-origin: bottom;
+  background-color: green;
+  transition: transform 0.5s, background-color 0.5s;
+}
+
+.gauge-cover {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.aqi-status {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 10px;
+}
