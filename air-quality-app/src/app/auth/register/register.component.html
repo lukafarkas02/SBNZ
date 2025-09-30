@@ -1,0 +1,69 @@
+<div class="auth-container">
+  <h2>Register</h2>
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <label>First Name</label>
+    <input type="text" formControlName="firstName" />
+
+    <label>Last Name</label>
+    <input type="text" formControlName="lastName" />
+
+    <label>Email</label>
+    <input type="email" formControlName="email" />
+
+    <label>Password</label>
+    <input type="password" formControlName="password" />
+
+    <label>Confirm Password</label>
+    <input type="password" formControlName="confirmPassword" />
+
+     <!-- Tip korisnika -->
+    <label>Tip korisnika</label>
+    <select formControlName="userType">
+      <option value="">-- Izaberite tip --</option>
+      <option value="gradjanin">Građanin</option>
+      <option value="rizicna">Rizična grupa</option>
+      <option value="institucija">Institucija</option>
+    </select>
+
+    <!-- Ako je rizična grupa -->
+    <div *ngIf="registerForm.get('userType')?.value === 'rizicna'">
+      <label>Tip rizične grupe</label>
+      <select formControlName="riskType">
+        <option value="">-- Izaberite grupu --</option>
+        <option value="dete">Dete</option>
+        <option value="starija">Starija osoba</option>
+        <option value="hronicni">Hronični bolesnik</option>
+        <option value="trudnica">Trudnica</option>
+      </select>
+    </div>
+
+    <!-- Ako je institucija -->
+    <div *ngIf="registerForm.get('userType')?.value === 'institucija'">
+      <label>Naziv institucije</label>
+      <input type="text" formControlName="institutionName" />
+
+      <label>Tip institucije</label>
+      <select formControlName="institutionType">
+        <option value="">-- Izaberite tip --</option>
+        <option value="skola">Škola</option>
+        <option value="vrtic">Vrtić</option>
+        <option value="bolnica">Bolnica</option>
+        <option value="drugo">Drugo</option>
+      </select>
+
+      <label>Adresa</label>
+      <input type="text" formControlName="institutionAddress" />
+    </div>
+
+    <!-- Lokacija (za sve tipove korisnika) -->
+    <label>Grad / Lokacija</label>
+    <input type="text" formControlName="location" />
+
+    <button type="submit" [disabled]="registerForm.invalid">Register</button>
+  </form>
+
+  <p class="auth-link">
+    Već imate nalog? 
+    <a routerLink="/login">Prijavite se</a>
+  </p>
+</div>

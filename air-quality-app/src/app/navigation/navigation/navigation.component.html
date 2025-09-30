@@ -1,0 +1,15 @@
+<nav class="nav-container">
+  <div class="right-section">
+    <span class="account">My Account</span>
+    <button class="burger" (click)="toggleMenu()">
+      &#9776;
+    </button>
+  </div>
+
+  <ul class="dropdown" *ngIf="menuOpen">
+    <li><a routerLink="/dashboard">Dashboard</a></li>
+    <li><a routerLink="/details">Details</a></li>
+    <li><a routerLink="/history">History</a></li>
+    <li><a routerLink="/warnings">Warnings</a></li>
+  </ul>
+</nav>

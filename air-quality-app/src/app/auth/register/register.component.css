@@ -1,0 +1,78 @@
+.auth-container {
+  width: 400px;
+  margin: 40px auto;
+  padding: 25px;
+  border-radius: 12px;
+  background: #fff8f0; /* svetlo narandžasta pozadina */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.auth-container h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #b35900;
+}
+
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-container label {
+  margin-top: 12px;
+  font-weight: 600;
+  color: #444;
+}
+
+.auth-container input {
+  padding: 10px;
+  margin-top: 6px;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.auth-container input:focus {
+  border-color: #ff8000;
+  outline: none;
+}
+
+.auth-container button {
+  margin-top: 25px;
+  padding: 12px;
+  background: #ff8000;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.auth-container button:hover:not(:disabled) {
+  background: #cc6600;
+}
+
+.auth-container button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.auth-link {
+  margin-top: 15px;
+  font-size: 14px;
+  text-align: center;
+  color: #555;
+}
+
+.auth-link a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.auth-link a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
