@@ -7,8 +7,17 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication(scanBasePackages = "com.ftn")
+
+@SpringBootApplication(
+	scanBasePackages = "com.ftn",
+	exclude = { 
+    	org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class 
+})
+@EntityScan(basePackages = "com.ftn.model") // <-- ovde skeniramo JPA entitete
+@EnableJpaRepositories(basePackages = "com.ftn.service") // <-- ovde skeniramo repozitorijume
 public class Application implements CommandLineRunner {
 
     public static void main(String[] args) {

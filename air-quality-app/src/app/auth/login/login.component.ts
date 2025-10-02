@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../../service/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -11,8 +12,9 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 })
 export class LoginComponent {
   loginForm: FormGroup;
+  errorMessage = '';
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private authService: AuthService) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
@@ -20,9 +22,26 @@ export class LoginComponent {
   }
 
   onSubmit() {
-    if (this.loginForm.valid) {
-      console.log('Login data:', this.loginForm.value);
-      // ovde pozovi backend API za login
-    }
+    if (this.loginForm.invalid) return;
+
+    const formValue = this.loginForm.value;
+    const payload: any = {
+      email: formValue.email,
+      password: formValue.password
+    };
+
+    console.log(payload);
+
+    this.authService.login(payload).subscribe({
+      next: (res) => {
+        console.log('Uspešna prijava na sistem', res);
+        alert('Prijava uspesna!');
+        this.loginForm.reset();
+      },
+      error: (err) => {
+        console.error('Greška pri prijavi', err);
+        this.errorMessage = 'Došlo je do greške prilikom prijave.';
+      }
+    });
   }
 }

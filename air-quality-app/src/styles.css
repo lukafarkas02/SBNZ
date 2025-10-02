@@ -1,1 +1,7 @@
-/* You can add global styles to this file, and also import other style files */
+/* Globalni font */
+html, body {
+  font-family: 'Segoe UI';
+  background: #f4faf6; /* svetlo-zelena pozadina stranice */
+  margin: 0;
+  padding: 0;
+}

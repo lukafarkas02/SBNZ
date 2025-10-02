@@ -16,47 +16,46 @@
     <label>Confirm Password</label>
     <input type="password" formControlName="confirmPassword" />
 
-     <!-- Tip korisnika -->
-    <label>Tip korisnika</label>
+    <label>User type</label>
     <select formControlName="userType">
-      <option value="">-- Izaberite tip --</option>
-      <option value="gradjanin">Građanin</option>
-      <option value="rizicna">Rizična grupa</option>
-      <option value="institucija">Institucija</option>
+      <option value="">Choose type</option>
+      <option value="citizen">Citizen</option>
+      <option value="risk_group">Risk group</option>
+      <option value="institution">Institution</option>
     </select>
 
-    <!-- Ako je rizična grupa -->
-    <div *ngIf="registerForm.get('userType')?.value === 'rizicna'">
-      <label>Tip rizične grupe</label>
+    <div *ngIf="registerForm.get('userType')?.value === 'risk_group'">
+      <label>Type of risk group</label>
       <select formControlName="riskType">
-        <option value="">-- Izaberite grupu --</option>
-        <option value="dete">Dete</option>
-        <option value="starija">Starija osoba</option>
-        <option value="hronicni">Hronični bolesnik</option>
-        <option value="trudnica">Trudnica</option>
+        <option value="">Choose group</option>
+        <option value="child">Child</option>
+        <option value="elderly">Elderly</option>
+        <option value="chronical">Chronical</option>
+        <option value="pregnant">Pregnant</option>
       </select>
     </div>
 
-    <!-- Ako je institucija -->
-    <div *ngIf="registerForm.get('userType')?.value === 'institucija'">
-      <label>Naziv institucije</label>
+    <div *ngIf="registerForm.get('userType')?.value === 'institution'">
+      <label>Institution name</label>
       <input type="text" formControlName="institutionName" />
 
-      <label>Tip institucije</label>
+      <label>Institution type</label>
       <select formControlName="institutionType">
-        <option value="">-- Izaberite tip --</option>
-        <option value="skola">Škola</option>
-        <option value="vrtic">Vrtić</option>
-        <option value="bolnica">Bolnica</option>
-        <option value="drugo">Drugo</option>
+        <option value="">Choose type</option>
+        <option value="healthcare">HEALTHCARE</option>
+        <option value="education">EDUCATION</option>
+        <option value="sports">SPORTS</option>
+        <option value="geriatric">GERIATRIC</option>
+        <option value="business">BUSINESS</option>
+        <option value="goverment">GOVERMENT</option>
+        <option value="other">OTHER</option>
       </select>
 
-      <label>Adresa</label>
+      <label>Address</label>
       <input type="text" formControlName="institutionAddress" />
     </div>
 
-    <!-- Lokacija (za sve tipove korisnika) -->
-    <label>Grad / Lokacija</label>
+    <label>City</label>
     <input type="text" formControlName="location" />
 
     <button type="submit" [disabled]="registerForm.invalid">Register</button>
