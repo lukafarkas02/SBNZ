@@ -1,33 +1,33 @@
-package com.example.airquality.rules
+// package com.example.airquality.rules
 
-import com.example.airquality.model.PollutantMeasurement;
-import com.example.airquality.model.AirQualityStatus;
+// import com.example.airquality.model.PollutantMeasurement;
+// import com.example.airquality.model.AirQualityStatus;
 
-// Pravilo 1 – nagli porast PM2.5 u 30 minuta
-rule "Nagli porast PM2.5"
-when
-    $m1 : PollutantMeasurement($pm25 : pm25, $t1 : timestamp)
-    $m2 : PollutantMeasurement(this after[0s,30m] $m1, pm25 - $pm25 > 20)
-then
-    AirQualityStatus status = new AirQualityStatus();
-    status.setCategory(AirQualityStatus.OPASAN);
-    status.setExplanation("Nagli skok PM2.5 za više od 20 µg/m³ u 30 minuta");
-    status.setRecommendation("Ostanite unutra i obavestite institucije!");
-    insert(status);
-end
+// // Pravilo 1 – nagli porast PM2.5 u 30 minuta
+// rule "Nagli porast PM2.5"
+// when
+//     $m1 : PollutantMeasurement($pm25 : pm25, $t1 : timestamp)
+//     $m2 : PollutantMeasurement(this after[0s,30m] $m1, pm25 - $pm25 > 20)
+// then
+//     AirQualityStatus status = new AirQualityStatus();
+//     status.setCategory(AirQualityStatus.OPASAN);
+//     status.setExplanation("Nagli skok PM2.5 za više od 20 µg/m³ u 30 minuta");
+//     status.setRecommendation("Ostanite unutra i obavestite institucije!");
+//     insert(status);
+// end
 
-// Pravilo 2 – prosečan PM2.5 u poslednja 24h
-rule "Dnevni prosek PM2.5"
-when
-    accumulate(
-        $m : PollutantMeasurement( $pm25 : pm25 ) over window:time(24h),
-        $avg : average($pm25)
-    )
-    eval($avg > 35)
-then
-    AirQualityStatus status = new AirQualityStatus();
-    status.setCategory(AirQualityStatus.LOS);
-    status.setExplanation("Prosečan PM2.5 u poslednja 24h: " + $avg);
-    status.setRecommendation("Izbegavajte aktivnosti na otvorenom.");
-    insert(status);
-end
+// // Pravilo 2 – prosečan PM2.5 u poslednja 24h
+// rule "Dnevni prosek PM2.5"
+// when
+//     accumulate(
+//         $m : PollutantMeasurement( $pm25 : pm25 ) over window:time(24h),
+//         $avg : average($pm25)
+//     )
+//     eval($avg > 35)
+// then
+//     AirQualityStatus status = new AirQualityStatus();
+//     status.setCategory(AirQualityStatus.LOS);
+//     status.setExplanation("Prosečan PM2.5 u poslednja 24h: " + $avg);
+//     status.setRecommendation("Izbegavajte aktivnosti na otvorenom.");
+//     insert(status);
+// end

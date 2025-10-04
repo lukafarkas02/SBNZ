@@ -1,9 +1,17 @@
 package com.ftn.model.messages;
 
-import lombok.Data;
+import javax.persistence.*;
+import lombok.*;
 
+import com.ftn.model.InstitutionType;
+
+import java.util.List;
+import java.util.Map;
+
+@Entity
 @Data
 public class InstitutionalMessage extends Message {
-    private String institutionType; // Škola, vrtić, bolnica...
-    private String recommendation;  // npr. "Prekinuti aktivnosti na otvorenom"
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String recommendation;
 }

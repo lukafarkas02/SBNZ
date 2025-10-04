@@ -1,22 +1,41 @@
 package com.ftn.model;
 
+import javax.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
-import com.ftn.model.PollutantMeasurment;
+import com.ftn.model.Measurement;
 import com.ftn.model.ContextData;
 import com.ftn.model.User;
 
+import java.util.List;
+import java.util.Map;
+
+@Entity
+@Table(name = "air_quality_inputs")
+@Data
 public class AirQualityInput {
-    private PollutantMeasurment pollutantMeasurment;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private Measurement pollutantMeasurment;
+
+    @OneToOne(cascade = CascadeType.ALL)
     private WeatherConditions weatherConditions;
+
+    @OneToOne(cascade = CascadeType.ALL)
     private ContextData contextData;
+
+    @ManyToOne
     private User user;
+    
     private LocalDateTime timestamp;
 
-    public AirQualityInput(PollutantMeasurment pollutantMeasurment,
-                           WeatherConditions weatherConditions,
-                           ContextData contextData,
-                           User user,
-                           LocalDateTime timestamp) {
+    public AirQualityInput() {}
+
+    public AirQualityInput(Measurement pollutantMeasurment, WeatherConditions weatherConditions, ContextData contextData, User user, LocalDateTime timestamp) {
         this.pollutantMeasurment = pollutantMeasurment;
         this.weatherConditions = weatherConditions;
         this.contextData = contextData;
@@ -24,8 +43,7 @@ public class AirQualityInput {
         this.timestamp = timestamp;
     }
 
-    // Getteri
-    public PollutantMeasurment getPollutantMeasurment() {
+    public Measurement getPollutantMeasurment() {
         return pollutantMeasurment;
     }
 
@@ -45,8 +63,7 @@ public class AirQualityInput {
         return timestamp;
     }
 
-    // Setteri
-    public void setPollutantMeasurment(PollutantMeasurment pollutantMeasurment) {
+    public void setPollutantMeasurment(Measurement pollutantMeasurment) {
         this.pollutantMeasurment = pollutantMeasurment;
     }
 

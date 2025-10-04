@@ -6,7 +6,7 @@ import { AppComponent } from './app.component';
 import { NgModule } from '@angular/core';
 
 export const routes: Routes = [
-    { path: '', component: AppComponent },
+    { path: '', component: RegisterComponent },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
     { path: 'dashboard', component: DashboardComponent }

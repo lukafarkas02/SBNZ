@@ -9,4 +9,8 @@
         <kbase name="backward-kbase" packages="backward">
         <ksession name="backward-ksession"/>
     </kbase>
+
+    <kbase name="basicRules" packages="basicRules">
+        <ksession name="basic-ksession"/>
+    </kbase>
 </kmodule>

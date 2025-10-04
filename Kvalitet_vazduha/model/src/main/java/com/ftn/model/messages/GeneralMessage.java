@@ -1,8 +1,12 @@
 package com.ftn.model.messages;
 
+import javax.persistence.*;
+import lombok.*;
+
 import com.ftn.model.AirQualityCategory;
 
+@Entity
+@Data
 public class GeneralMessage extends Message {
-    private AirQualityCategory AirQualityCategory; 
-    // npr. LOW, MEDIUM, HIGH – veže se za stanje vazduha
+
 }
