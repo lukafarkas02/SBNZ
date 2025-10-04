@@ -6,6 +6,8 @@ import lombok.*;
 import com.ftn.model.PollutantType;
 import com.ftn.model.AirQualityCategory;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "pollutants")
 @Data
@@ -23,6 +25,7 @@ public class Pollutant{
 
     @ManyToOne
     @JoinColumn(name = "measurement_id")
+    @JsonIgnore
     private Measurement measurement;
 
     public Pollutant(){}

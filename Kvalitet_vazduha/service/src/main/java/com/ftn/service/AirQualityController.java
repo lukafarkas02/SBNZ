@@ -3,17 +3,23 @@ package com.ftn.service;
 import com.ftn.model.AirQualityStatus;
 import com.ftn.model.AirQualityCategory;
 import com.ftn.model.AirPollutionEvent;
+import com.ftn.dto.PollutantHistoryDTO;
+import com.ftn.service.AirQualityService;
 import com.ftn.util.KnowledgeSessionHelper;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 @RequestMapping("/api/air")
+@CrossOrigin(origins = "http://localhost:4200")
 public class AirQualityController {
 
     private final KieContainer kieContainer;
@@ -21,8 +27,16 @@ public class AirQualityController {
 
     private AirQualityStatus sharedStatus;
 
+    @Autowired
+    private AirQualityService airQualityService;
+
     public AirQualityController(KieContainer kieContainer) {
         this.kieContainer = kieContainer;
+    }
+
+    @GetMapping("/pollutants/last24h")
+    public ResponseEntity<List<PollutantHistoryDTO>> getPollutantHistoryLast24h() {
+        return ResponseEntity.ok(airQualityService.getPollutantHistoryLast24h());
     }
 
     @PostConstruct
