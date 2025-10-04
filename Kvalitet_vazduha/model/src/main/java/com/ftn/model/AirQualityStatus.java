@@ -3,7 +3,7 @@ package com.ftn.model;
 import com.ftn.model.AirQualityCategory;
 
 public class AirQualityStatus {
-    private AirQualityCategory category; // DOBAR, UMEREN, LOŠ, OPASAN
+    private AirQualityCategory category;
     private String explanation;
     private String recommendation;
 

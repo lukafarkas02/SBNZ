@@ -1,0 +1,745 @@
+package rules.basicRules
+
+import com.ftn.model.Measurement;
+import com.ftn.model.Pollutant;
+import com.ftn.model.PollutantType;
+import com.ftn.model.AirQualityCategory;
+import com.ftn.model.DecisionExplanations;
+import com.ftn.model.AirQualityInfo;
+import com.ftn.model.User;
+import com.ftn.model.UserType;
+import com.ftn.model.messages.Message;
+import com.ftn.model.messages.GeneralMessage;
+import com.ftn.model.messages.SpecializedMessage;
+import com.ftn.model.messages.InstitutionalMessage;
+import com.ftn.model.AirQualityInput;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
+
+////////////////////////////
+// PM2.5 - KATEGORIZACIJA//
+//////////////////////////
+
+rule "PM2.5 GOOD"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.PM2_5, value <= 15) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.GOOD);
+end
+
+rule "PM2.5 MODERATE"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.PM2_5, value > 15 && value <= 35) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.MODERATE);
+end
+
+rule "PM2.5 POOR"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.PM2_5, value > 35 && value <= 55) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.POOR);
+end
+
+rule "PM2.5 HAZARDOUS"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.PM2_5, value > 55) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.HAZARDOUS);
+end
+
+////////////////////////////
+// PM10 - KATEGORIZACIJA//
+//////////////////////////
+
+rule "PM10 GOOD"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.PM10, value <= 25) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.GOOD);
+end
+
+rule "PM10 MODERATE"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.PM10, value > 25 && value <= 50) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.MODERATE);
+end
+
+rule "PM10 POOR"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.PM10, value > 50 && value <= 100) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.POOR);
+end
+
+rule "PM10 HAZARDOUS"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.PM10, value > 100) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.HAZARDOUS);
+end
+
+////////////////////////////
+// NO2 - KATEGORIZACIJA//
+//////////////////////////
+
+rule "NO2 GOOD"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.NO2, value <= 40) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.GOOD);
+end
+
+rule "NO2 MODERATE"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.NO2, value > 40 && value <= 90) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.MODERATE);
+end
+
+rule "NO2 POOR"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.NO2, value > 90 && value <= 180) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.POOR);
+end
+
+rule "NO2 HAZARDOUS"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.NO2, value > 180) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.HAZARDOUS);
+end
+
+////////////////////////////
+// O3 - KATEGORIZACIJA//
+//////////////////////////
+
+rule "O3 GOOD"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.O3, value <= 100) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.GOOD);
+end
+
+rule "O3 MODERATE"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.O3, value > 100 && value <= 140) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.MODERATE);
+end
+
+rule "O3 POOR"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.O3, value > 140 && value <= 180) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.POOR);
+end
+
+rule "O3 HAZARDOUS"
+when
+    $input : AirQualityInput( $measurement : pollutantMeasurment)
+    $p : Pollutant( pollutantType == PollutantType.O3, value > 180) from $measurement.pollutants
+then
+    $p.setStatus(AirQualityCategory.HAZARDOUS);
+end
+
+////////////////////////////
+// FINALNA KATEGORIZACIJA//
+//////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+rule "Set AirQualityInfo to HAZARDOUS for citizens"
+when
+    $input : AirQualityInput( 
+        $measurement : pollutantMeasurment,
+        user != null,
+        user.userType == UserType.CITIZEN    
+    )
+    $p_hazardous : Pollutant(status == AirQualityCategory.HAZARDOUS) from $measurement.pollutants
+then
+    AirQualityInfo info = new AirQualityInfo();
+    info.setInput($input);
+    
+    info.setAirCategory(AirQualityCategory.HAZARDOUS);
+
+    DecisionExplanations explanation = new DecisionExplanations();
+    List<String> allPollutants = new ArrayList<>();
+    for (Pollutant p : $measurement.getPollutants()) {
+        allPollutants.add(p.getPollutantType().name() + " = " + p.getValue());
+    }
+    explanation.setInfluencingPollutants(allPollutants);
+
+    info.setExplanation(explanation);
+
+    String messageContent = "WARNING! Air quality is hazardous to health. All citizens are advised to stay indoors and avoid any outdoor activities.";
+    LocalDateTime now = LocalDateTime.now();
+    GeneralMessage message = new GeneralMessage();
+    message.setContent(messageContent);
+    message.setTimestamp(now);
+
+    info.setRecommendation(message);
+    
+    insert(info);
+end
+
+rule "Set AirQualityInfo to HAZARDOUS for risk groups"
+when
+    $input : AirQualityInput( 
+        $measurement : pollutantMeasurment,
+        user != null,
+        user.userType == UserType.RISK_GROUP    
+    )
+    $p_hazardous : Pollutant(status == AirQualityCategory.HAZARDOUS) from $measurement.pollutants
+then
+    AirQualityInfo info = new AirQualityInfo();
+    info.setInput($input);
+    
+    info.setAirCategory(AirQualityCategory.HAZARDOUS);
+
+    DecisionExplanations explanation = new DecisionExplanations();
+    List<String> allPollutants = new ArrayList<>();
+    for (Pollutant p : $measurement.getPollutants()) {
+        allPollutants.add(p.getPollutantType().name() + " = " + p.getValue());
+    }
+    explanation.setInfluencingPollutants(allPollutants);
+
+    info.setExplanation(explanation);
+
+    String messageContent = "WARNING! Air quality is hazardous to health. All citizens are advised to stay indoors and avoid any outdoor activities.";
+    String recommodendation = "Do not go outdoors under any circumstances. Keep children, elderly, and chronic patients indoors. Use protective measures indoors if possible (air filters, masks). Monitor health conditions closely; seek medical attention if necessary.";
+    LocalDateTime now = LocalDateTime.now();
+    SpecializedMessage message = new SpecializedMessage();
+    message.setContent(messageContent);
+    message.setTimestamp(now);
+    message.setRecommendation(recommodendation);
+
+    info.setRecommendation(message);
+    
+    insert(info);
+end
+
+rule "Set AirQualityInfo to HAZARDOUS for institutions"
+when
+    $input : AirQualityInput( 
+        $measurement : pollutantMeasurment,
+        user != null,
+        user.userType == UserType.INSTITUTION    
+    )
+    $p_hazardous : Pollutant(status == AirQualityCategory.HAZARDOUS) from $measurement.pollutants
+then
+    AirQualityInfo info = new AirQualityInfo();
+    info.setInput($input);
+    
+    info.setAirCategory(AirQualityCategory.HAZARDOUS);
+
+    DecisionExplanations explanation = new DecisionExplanations();
+    List<String> allPollutants = new ArrayList<>();
+    for (Pollutant p : $measurement.getPollutants()) {
+        allPollutants.add(p.getPollutantType().name() + " = " + p.getValue());
+    }
+    explanation.setInfluencingPollutants(allPollutants);
+
+    info.setExplanation(explanation);
+
+    String messageContent = "WARNING! Air quality is hazardous to health. All citizens are advised to stay indoors and avoid any outdoor activities.";
+    String recommodendation = "Cancel all outdoor activities immediately. Keep doors and windows closed; ensure indoor air quality is safe. Protect all occupants, especially sensitive individuals. Follow emergency protocols if necessary (e.g., schools sending children home early, hospitals implementing safety measures). Provide official notices to staff, clients, and parents/guardians.";
+    LocalDateTime now = LocalDateTime.now();
+    InstitutionalMessage message = new InstitutionalMessage();
+    message.setContent(messageContent);
+    message.setTimestamp(now);
+    message.setRecommendation(recommodendation);
+
+    info.setRecommendation(message);
+    
+    insert(info);
+end
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+rule "Set AirQualityInfo to POOR (one pollutant) for citizens"
+when
+    $input : AirQualityInput( 
+        $measurement : pollutantMeasurment,
+        user != null,
+        user.userType == UserType.CITIZEN 
+    )
+    not $p_hazardous : Pollutant(status == AirQualityCategory.HAZARDOUS) from $measurement.pollutants
+    $countPoor : Number(intValue == 1) from accumulate(
+        $p_poor : Pollutant(status == AirQualityCategory.POOR) from $measurement.pollutants,
+        count(1)
+    )
+then
+    AirQualityInfo info = new AirQualityInfo();
+    info.setInput($input);
+    
+    info.setAirCategory(AirQualityCategory.POOR);
+    
+    DecisionExplanations explanation = new DecisionExplanations();
+    List<String> allPollutants = new ArrayList<>();
+    for (Pollutant p : $measurement.getPollutants()) {
+        allPollutants.add(p.getPollutantType().name() + " = " + p.getValue());
+    }
+    explanation.setInfluencingPollutants(allPollutants);
+    
+    info.setExplanation(explanation);
+    
+    String messageContent = "Air quality is poor. It is recommended to limit time spent outdoors, especially during intense physical activities.";
+    LocalDateTime now = LocalDateTime.now();
+    GeneralMessage message = new GeneralMessage();
+    message.setContent(messageContent);
+    message.setTimestamp(now);
+    
+    info.setRecommendation(message);
+
+    insert(info);
+end
+
+rule "Set AirQualityInfo to POOR (one pollutant) for risk groups"
+when
+    $input : AirQualityInput( 
+        $measurement : pollutantMeasurment,
+        user != null,
+        user.userType == UserType.RISK_GROUP 
+    )
+    not $p_hazardous : Pollutant(status == AirQualityCategory.HAZARDOUS) from $measurement.pollutants
+    $countPoor : Number(intValue == 1) from accumulate(
+        $p_poor : Pollutant(status == AirQualityCategory.POOR) from $measurement.pollutants,
+        count(1)
+    )
+then
+    AirQualityInfo info = new AirQualityInfo();
+    info.setInput($input);
+    
+    info.setAirCategory(AirQualityCategory.POOR);
+    
+    DecisionExplanations explanation = new DecisionExplanations();
+    List<String> allPollutants = new ArrayList<>();
+    for (Pollutant p : $measurement.getPollutants()) {
+        allPollutants.add(p.getPollutantType().name() + " = " + p.getValue());
+    }
+    explanation.setInfluencingPollutants(allPollutants);
+    
+    info.setExplanation(explanation);
+    
+    LocalDateTime now = LocalDateTime.now();
+    String messageContent = "Air quality is poor. It is recommended to limit time spent outdoors, especially during intense physical activities.";
+    String recommodendation = "Children, elderly, and chronic patients should minimize outdoor exposure. Avoid intense physical activities outside. Keep windows closed and use air purifiers if possible.";
+    SpecializedMessage message = new SpecializedMessage();
+    message.setContent(messageContent);
+    message.setTimestamp(now);
+    message.setRecommendation(recommodendation);
+
+    info.setRecommendation(message);
+
+    insert(info);
+end
+
+rule "Set AirQualityInfo to POOR (one pollutant) for institutions"
+when
+    $input : AirQualityInput( 
+        $measurement : pollutantMeasurment,
+        user != null,
+        user.userType == UserType.INSTITUTION
+    )
+    not $p_hazardous : Pollutant(status == AirQualityCategory.HAZARDOUS) from $measurement.pollutants
+    $countPoor : Number(intValue == 1) from accumulate(
+        $p_poor : Pollutant(status == AirQualityCategory.POOR) from $measurement.pollutants,
+        count(1)
+    )
+then
+    AirQualityInfo info = new AirQualityInfo();
+    info.setInput($input);
+    
+    info.setAirCategory(AirQualityCategory.POOR);
+    
+    DecisionExplanations explanation = new DecisionExplanations();
+    List<String> allPollutants = new ArrayList<>();
+    for (Pollutant p : $measurement.getPollutants()) {
+        allPollutants.add(p.getPollutantType().name() + " = " + p.getValue());
+    }
+    explanation.setInfluencingPollutants(allPollutants);
+    
+    info.setExplanation(explanation);
+    
+    LocalDateTime now = LocalDateTime.now();
+    String messageContent = "Air quality is poor. It is recommended to limit time spent outdoors, especially during intense physical activities.";
+    String recommodendation = "Limit outdoor activities for sensitive groups (e.g., children in schools, elderly in care homes). Ensure indoor areas have good air circulation or filtration. Consider rescheduling outdoor events or physical education classes.";
+    InstitutionalMessage message = new InstitutionalMessage();
+    message.setContent(messageContent);
+    message.setTimestamp(now);
+    message.setRecommendation(recommodendation);
+
+    info.setRecommendation(message);
+
+    insert(info);
+end
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+rule "Set AirQualityInfo to VERY_POOR (multiple pollutants) for citizens"
+when
+    $input : AirQualityInput( 
+        $measurement : pollutantMeasurment,
+        user != null,
+        user.userType == UserType.CITIZEN
+    )
+    not $p_hazardous : Pollutant(status == AirQualityCategory.HAZARDOUS) from $measurement.pollutants
+    $countPoor : Number(intValue > 1) from accumulate(
+        $p_poor : Pollutant(status == AirQualityCategory.POOR) from $measurement.pollutants,
+        count(1)
+    )
+then
+    AirQualityInfo info = new AirQualityInfo();
+    info.setInput($input);
+    
+    info.setAirCategory(AirQualityCategory.VERY_POOR);
+
+    DecisionExplanations explanation = new DecisionExplanations();
+    List<String> allPollutants = new ArrayList<>();
+    for (Pollutant p : $measurement.getPollutants()) {
+        allPollutants.add(p.getPollutantType().name() + " = " + p.getValue());
+    }
+    explanation.setInfluencingPollutants(allPollutants);
+    
+    info.setExplanation(explanation);
+
+    String messageContent = "Air quality is very poor. Avoid outdoor activities whenever possible. Children, the elderly, and people with chronic illnesses should be especially cautious.";
+    LocalDateTime now = LocalDateTime.now();
+    GeneralMessage message = new GeneralMessage();
+    message.setContent(messageContent);
+    message.setTimestamp(now);
+    
+    info.setRecommendation(message);
+
+    insert(info);
+end
+
+rule "Set AirQualityInfo to VERY_POOR (multiple pollutants) for risk groups"
+when
+    $input : AirQualityInput( 
+        $measurement : pollutantMeasurment,
+        user != null,
+        user.userType == UserType.RISK_GROUP
+    )
+    not $p_hazardous : Pollutant(status == AirQualityCategory.HAZARDOUS) from $measurement.pollutants
+    $countPoor : Number(intValue > 1) from accumulate(
+        $p_poor : Pollutant(status == AirQualityCategory.POOR) from $measurement.pollutants,
+        count(1)
+    )
+then
+    AirQualityInfo info = new AirQualityInfo();
+    info.setInput($input);
+    
+    info.setAirCategory(AirQualityCategory.VERY_POOR);
+
+    DecisionExplanations explanation = new DecisionExplanations();
+    List<String> allPollutants = new ArrayList<>();
+    for (Pollutant p : $measurement.getPollutants()) {
+        allPollutants.add(p.getPollutantType().name() + " = " + p.getValue());
+    }
+    explanation.setInfluencingPollutants(allPollutants);
+    
+    info.setExplanation(explanation);
+
+    String messageContent = "Air quality is very poor. Avoid outdoor activities whenever possible. Children, the elderly, and people with chronic illnesses should be especially cautious.";
+    String recommodendation = "Risk groups should stay indoors as much as possible. Avoid outdoor exercise entirely. Ensure indoor air quality is good (air purifiers, closed windows). Have emergency medications ready (inhalers, etc.)"; 
+    LocalDateTime now = LocalDateTime.now();
+    SpecializedMessage message = new SpecializedMessage();
+    message.setContent(messageContent);
+    message.setTimestamp(now);
+    message.setRecommendation(recommodendation);
+    
+    info.setRecommendation(message);
+    
+    insert(info);
+end
+
+rule "Set AirQualityInfo to VERY_POOR (multiple pollutants) for institutions"
+when
+    $input : AirQualityInput( 
+        $measurement : pollutantMeasurment,
+        user != null,
+        user.userType == UserType.INSTITUTION
+    )
+    not $p_hazardous : Pollutant(status == AirQualityCategory.HAZARDOUS) from $measurement.pollutants
+    $countPoor : Number(intValue > 1) from accumulate(
+        $p_poor : Pollutant(status == AirQualityCategory.POOR) from $measurement.pollutants,
+        count(1)
+    )
+then
+    AirQualityInfo info = new AirQualityInfo();
+    info.setInput($input);
+    
+    info.setAirCategory(AirQualityCategory.VERY_POOR);
+
+    DecisionExplanations explanation = new DecisionExplanations();
+    List<String> allPollutants = new ArrayList<>();
+    for (Pollutant p : $measurement.getPollutants()) {
+        allPollutants.add(p.getPollutantType().name() + " = " + p.getValue());
+    }
+    explanation.setInfluencingPollutants(allPollutants);
+    
+    info.setExplanation(explanation);
+
+    String messageContent = "Air quality is very poor. Avoid outdoor activities whenever possible. Children, the elderly, and people with chronic illnesses should be especially cautious.";
+    String recommodendation = "Suspend outdoor activities for all vulnerable groups. Keep windows closed, use air purifiers where possible. Postpone events that require physical effort outdoors. Inform staff and users about potential health risks."; 
+    LocalDateTime now = LocalDateTime.now();
+    InstitutionalMessage message = new InstitutionalMessage();
+    message.setContent(messageContent);
+    message.setTimestamp(now);
+    message.setRecommendation(recommodendation);
+    
+    info.setRecommendation(message);
+    
+    insert(info);
+end
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+rule "Set AirQualityInfo to MODERATE for citizens"
+when
+    $input : AirQualityInput( 
+        $measurement : pollutantMeasurment,
+        user != null,
+        user.userType == UserType.CITIZEN
+    )
+    not $p_hazardous : Pollutant(status == AirQualityCategory.HAZARDOUS) from $measurement.pollutants
+    not $p_poor : Pollutant(status == AirQualityCategory.POOR) from $measurement.pollutants
+
+    $p_moderate : Pollutant(status == AirQualityCategory.MODERATE) from $measurement.pollutants
+then
+    AirQualityInfo info = new AirQualityInfo();
+    info.setInput($input);
+    
+    info.setAirCategory(AirQualityCategory.MODERATE);
+
+    DecisionExplanations explanation = new DecisionExplanations();
+    List<String> allPollutants = new ArrayList<>();
+    for (Pollutant p : $measurement.getPollutants()) {
+        allPollutants.add(p.getPollutantType().name() + " = " + p.getValue());
+    }
+    explanation.setInfluencingPollutants(allPollutants);
+    
+    info.setExplanation(explanation);
+
+    String messageContent = "Air quality is moderate. Most people will not be affected, but sensitive individuals may experience mild discomfort during prolonged outdoor activities.";
+    LocalDateTime now = LocalDateTime.now();
+    GeneralMessage message = new GeneralMessage();
+    message.setContent(messageContent);
+    message.setTimestamp(now);
+    
+    info.setRecommendation(message);
+
+    insert(info);
+end
+
+rule "Set AirQualityInfo to MODERATE for risk groups"
+when
+    $input : AirQualityInput( 
+        $measurement : pollutantMeasurment,
+        user != null,
+        user.userType == UserType.RISK_GROUP
+    )
+    not $p_hazardous : Pollutant(status == AirQualityCategory.HAZARDOUS) from $measurement.pollutants
+    not $p_poor : Pollutant(status == AirQualityCategory.POOR) from $measurement.pollutants
+
+    $p_moderate : Pollutant(status == AirQualityCategory.MODERATE) from $measurement.pollutants
+then
+    AirQualityInfo info = new AirQualityInfo();
+    info.setInput($input);
+    
+    info.setAirCategory(AirQualityCategory.MODERATE);
+
+    DecisionExplanations explanation = new DecisionExplanations();
+    List<String> allPollutants = new ArrayList<>();
+    for (Pollutant p : $measurement.getPollutants()) {
+        allPollutants.add(p.getPollutantType().name() + " = " + p.getValue());
+    }
+    explanation.setInfluencingPollutants(allPollutants);
+    
+    info.setExplanation(explanation);
+
+    String messageContent = "Air quality is moderate. Most people will not be affected, but sensitive individuals may experience mild discomfort during prolonged outdoor activities.";
+    String recommodendation = "Risk groups should limit prolonged outdoor activities if they feel discomfort. Consider taking regular breaks indoors. Keep medications handy if you have respiratory issues."; 
+    LocalDateTime now = LocalDateTime.now();
+    SpecializedMessage message = new SpecializedMessage();
+    message.setContent(messageContent);
+    message.setTimestamp(now);
+    message.setRecommendation(recommodendation);
+    
+    info.setRecommendation(message);
+    
+    insert(info);
+end
+
+rule "Set AirQualityInfo to MODERATE for institutions"
+when
+    $input : AirQualityInput( 
+        $measurement : pollutantMeasurment,
+        user != null,
+        user.userType == UserType.INSTITUTION
+    )
+    not $p_hazardous : Pollutant(status == AirQualityCategory.HAZARDOUS) from $measurement.pollutants
+    not $p_poor : Pollutant(status == AirQualityCategory.POOR) from $measurement.pollutants
+
+    $p_moderate : Pollutant(status == AirQualityCategory.MODERATE) from $measurement.pollutants
+then
+    AirQualityInfo info = new AirQualityInfo();
+    info.setInput($input);
+    
+    info.setAirCategory(AirQualityCategory.MODERATE);
+
+    DecisionExplanations explanation = new DecisionExplanations();
+    List<String> allPollutants = new ArrayList<>();
+    for (Pollutant p : $measurement.getPollutants()) {
+        allPollutants.add(p.getPollutantType().name() + " = " + p.getValue());
+    }
+    explanation.setInfluencingPollutants(allPollutants);
+    
+    info.setExplanation(explanation);
+
+    String messageContent = "Air quality is moderate. Most people will not be affected, but sensitive individuals may experience mild discomfort during prolonged outdoor activities.";
+    String recommodendation = "Suspend outdoor activities for all vulnerable groups. Keep windows closed, use air purifiers where possible. Postpone events that require physical effort outdoors. Inform staff and users about potential health risks."; 
+    LocalDateTime now = LocalDateTime.now();
+    InstitutionalMessage message = new InstitutionalMessage();
+    message.setContent(messageContent);
+    message.setTimestamp(now);
+    message.setRecommendation(recommodendation);
+    
+    info.setRecommendation(message);
+
+    insert(info);
+end
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+rule "Set AirQualityInfo to GOOD for citizens"
+when
+    $input : AirQualityInput( 
+        $measurement : pollutantMeasurment,
+        user != null,
+        user.userType == UserType.CITIZEN
+    )
+    not $p_hazardous : Pollutant(status == AirQualityCategory.HAZARDOUS) from $measurement.pollutants
+    not $p_poor : Pollutant(status == AirQualityCategory.POOR) from $measurement.pollutants
+    not $p_moderate : Pollutant(status == AirQualityCategory.MODERATE) from $measurement.pollutants
+then
+    AirQualityInfo info = new AirQualityInfo();
+    info.setInput($input);
+
+    info.setAirCategory(AirQualityCategory.GOOD);
+
+    DecisionExplanations explanation = new DecisionExplanations();
+    List<String> allPollutants = new ArrayList<>();
+    for (Pollutant p : $measurement.getPollutants()) {
+        allPollutants.add(p.getPollutantType().name() + " = " + p.getValue());
+    }
+    explanation.setInfluencingPollutants(allPollutants);
+    
+    info.setExplanation(explanation);
+
+    String messageContent = "Air quality is good. There are no health risk, and you can safely enjoy outdoor activities.";
+    LocalDateTime now = LocalDateTime.now();
+    GeneralMessage message = new GeneralMessage();
+    message.setContent(messageContent);
+    message.setTimestamp(now);
+    
+    info.setRecommendation(message);
+    
+    insert(info);
+end
+
+rule "Set AirQualityInfo to GOOD for risk groups"
+when
+    $input : AirQualityInput( 
+        $measurement : pollutantMeasurment,
+        user != null,
+        user.userType == UserType.RISK_GROUP
+    )
+    not $p_hazardous : Pollutant(status == AirQualityCategory.HAZARDOUS) from $measurement.pollutants
+    not $p_poor : Pollutant(status == AirQualityCategory.POOR) from $measurement.pollutants
+    not $p_moderate : Pollutant(status == AirQualityCategory.MODERATE) from $measurement.pollutants
+then
+    AirQualityInfo info = new AirQualityInfo();
+    info.setInput($input);
+    
+    info.setAirCategory(AirQualityCategory.GOOD);
+
+    DecisionExplanations explanation = new DecisionExplanations();
+    List<String> allPollutants = new ArrayList<>();
+    for (Pollutant p : $measurement.getPollutants()) {
+        allPollutants.add(p.getPollutantType().name() + " = " + p.getValue());
+    }
+    explanation.setInfluencingPollutants(allPollutants);
+    
+    info.setExplanation(explanation);
+
+    String messageContent = "Air quality is good. There are no health risk, and you can safely enjoy outdoor activities.";
+    String recommodendation = "Children, elderly, and people with chronic illnesses can enjoy outdoor activities without special precautions."; 
+    LocalDateTime now = LocalDateTime.now();
+    SpecializedMessage message = new SpecializedMessage();
+    message.setContent(messageContent);
+    message.setTimestamp(now);
+    message.setRecommendation(recommodendation);
+    
+    info.setRecommendation(message);
+
+    insert(info);
+end
+
+rule "Set AirQualityInfo to GOOD for institutions"
+when
+    $input : AirQualityInput( 
+        $measurement : pollutantMeasurment,
+        user != null,
+        user.userType == UserType.INSTITUTION
+    )
+    not $p_hazardous : Pollutant(status == AirQualityCategory.HAZARDOUS) from $measurement.pollutants
+    not $p_poor : Pollutant(status == AirQualityCategory.POOR) from $measurement.pollutants
+    not $p_moderate : Pollutant(status == AirQualityCategory.MODERATE) from $measurement.pollutants
+then
+    AirQualityInfo info = new AirQualityInfo();    
+    info.setInput($input);
+    
+    info.setAirCategory(AirQualityCategory.GOOD);
+
+    DecisionExplanations explanation = new DecisionExplanations();
+    List<String> allPollutants = new ArrayList<>();
+    for (Pollutant p : $measurement.getPollutants()) {
+        allPollutants.add(p.getPollutantType().name() + " = " + p.getValue());
+    }
+    explanation.setInfluencingPollutants(allPollutants);
+    
+    info.setExplanation(explanation);
+
+    String messageContent = "Air quality is good. There are no health risk, and you can safely enjoy outdoor activities.";
+    String recommodendation = "Institutions can operate normally. Outdoor activities for students or staff can continue as planned. No special precautions needed."; 
+    LocalDateTime now = LocalDateTime.now();
+    InstitutionalMessage message = new InstitutionalMessage();
+    message.setContent(messageContent);
+    message.setTimestamp(now);
+    message.setRecommendation(recommodendation);
+    
+    info.setRecommendation(message);
+    
+    insert(info);
+end
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

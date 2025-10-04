@@ -1,9 +1,17 @@
 package com.ftn.model;
 
+// public enum AirQualityCategory {
+//     DOBAR,
+//     UMEREN,
+//     LOS,
+//     VEOMA_LOS,
+//     OPASAN
+// }
+
 public enum AirQualityCategory {
-    DOBAR,
-    UMEREN,
-    LOS,
-    VEOMA_LOS,
-    OPASAN
+    GOOD,
+    MODERATE,
+    POOR,
+    VERY_POOR,
+    HAZARDOUS
 }

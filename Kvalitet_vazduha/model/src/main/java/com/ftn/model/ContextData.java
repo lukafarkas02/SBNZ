@@ -1,22 +1,39 @@
 package com.ftn.model;
 
+import javax.persistence.*;
+import lombok.*;
+
 import com.ftn.model.Season;
+import com.ftn.model.TimeOfDay;
 
+import java.util.List;
+import java.util.Map;
+
+@Entity
+@Table(name = "context_data")
+@Data
 public class ContextData {
-    private int trafficDensity;       // npr. skala 0-10
-    private boolean industrialActivity;
-    private String timeOfDay;         // jutro, podne, veče
-    private Season season;            // ZIMA / LETO
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public ContextData(int trafficDensity, boolean industrialActivity,
-                       String timeOfDay, Season season) {
+    private int trafficDensity;
+    
+    private boolean industrialActivity;
+
+    @Enumerated(EnumType.STRING)
+    private TimeOfDay timeOfDay;
+
+    @Enumerated(EnumType.STRING)
+    private Season season;
+
+    public ContextData(int trafficDensity, boolean industrialActivity, TimeOfDay timeOfDay, Season season) {
         this.trafficDensity = trafficDensity;
         this.industrialActivity = industrialActivity;
         this.timeOfDay = timeOfDay;
         this.season = season;
     }
 
-    // Getteri
     public int getTrafficDensity() {
         return trafficDensity;
     }
@@ -25,7 +42,7 @@ public class ContextData {
         return industrialActivity;
     }
 
-    public String getTimeOfDay() {
+    public TimeOfDay getTimeOfDay() {
         return timeOfDay;
     }
 
@@ -33,7 +50,6 @@ public class ContextData {
         return season;
     }
 
-    // Setteri
     public void setTrafficDensity(int trafficDensity) {
         this.trafficDensity = trafficDensity;
     }
@@ -42,7 +58,7 @@ public class ContextData {
         this.industrialActivity = industrialActivity;
     }
 
-    public void setTimeOfDay(String timeOfDay) {
+    public void setTimeOfDay(TimeOfDay timeOfDay) {
         this.timeOfDay = timeOfDay;
     }
 

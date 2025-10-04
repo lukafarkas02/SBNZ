@@ -11,4 +11,8 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <kbase name="backward-kbase" packages="rules/backward">
         <ksession name="backward-ksession"/>
     </kbase>
+
+    <kbase name="basicRules" packages="rules/basicRules">
+        <ksession name="basic-ksession"/>
+    </kbase>
 </kmodule>
