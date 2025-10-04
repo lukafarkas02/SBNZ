@@ -2,49 +2,51 @@
 
 <div class="dashboard-container">
 
-  <h1>Welcome</h1>
+  <h1>Welcome, {{ userFirstName }}</h1>
 
   <div class="cards-row">
 
     <div class="card aqi-card">
-      <h2>Trenutni kvalitet vazduha</h2>
+      <h2>Current air quality</h2>
 
-      <div class="gauge-container">
-        <div class="gauge">
-            <div class="gauge-fill" [ngStyle] ="{'transform': 'rotate(' + gaugeRotation + 'deg)', 'background-color': gaugeColor}"></div>
-        </div>
-      </div>
+      <div class="aqi-box" [ngStyle]="{'background-color': getAirQualityColor(airQualityInfo?.airCategory)}"> </div>
       
-      <p class="aqi-value">{{ aqiStatus }}</p>
+      <p class="aqi-value">{{ airQualityInfo?.airCategory }}</p>
     </div>
 
-    <!-- Kartica 2: Grafikon -->
     <div class="card chart-card">
-      <h2>Promena PM2.5 i PM10 u poslednjih 24h</h2>
-      <div class="chart-placeholder">[Ovde ide linijski grafikon]</div>
+      <h2>Change in PM2.5 and PM10 in the last 24h</h2>
+      <!-- <div class="chart-placeholder">[Ovde ide linijski grafikon]</div> -->
+       <div style="display: block; height: 300px;">
+        <canvas baseChart
+                [data]="lineChartData"
+                [options]="lineChartOptions"
+                [type]="lineChartType">
+        </canvas>
+      </div>
     </div>
 
-    <!-- Kartica 3: Tabela polutanata -->
     <div class="card pollutants-card">
-      <h2>Trenutne vrednosti polutanata</h2>
+      <h2>Current pollutants values</h2>
       <table>
         <tr>
-          <th>Polutant</th>
-          <th>Vrednost</th>
+          <th>Pollutant</th>
+          <th>Value</th>
         </tr>
-        <tr *ngFor="let p of pollutants">
-          <td>{{ p.name }}</td>
-          <td>{{ p.value }}</td>
+        <tr *ngFor="let p of airQualityInfo?.explanation?.influencingPollutants">
+          <td>{{ p.split('=')[0].trim() }}</td>
+          <td>{{ p.split('=')[1].trim() }}</td>
         </tr>
       </table>
     </div>
   </div>
 
-  <!-- Upozorenja / Notifikacije -->
+
   <div class="alerts">
-    <h2>Upozorenja</h2>
+    <h2>Warnings</h2>
     <ul>
-      <li *ngFor="let alert of alerts">{{ alert }}</li>
+       <li>{{ airQualityInfo?.recommendation?.content }}</li>
+       <li>{{ airQualityInfo?.recommendation?.recommendation }}</li>
     </ul>
   </div>
 </div>

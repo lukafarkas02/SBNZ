@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/air-quality")
+@CrossOrigin(origins = "http://localhost:4200")
 public class AirQualityInfoController {
 
     @Autowired
@@ -35,6 +36,13 @@ public class AirQualityInfoController {
         
         AirQualityInput input = new AirQualityInput();
         input.setUser(user);
+
+        Measurement measurement = request.getMeasurement();
+        if (measurement != null && measurement.getPollutants() != null) {
+            for (Pollutant p : measurement.getPollutants()) {
+                p.setMeasurement(measurement);
+            }
+        }
         input.setPollutantMeasurment(request.getMeasurement());
         input.setTimestamp(LocalDateTime.now());
 
