@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-navigation',
@@ -10,8 +11,18 @@ import { CommonModule } from '@angular/common';
 })
 export class NavigationComponent {
   menuOpen = false;
+  
+  constructor(private router: Router){}
 
   toggleMenu() {
     this.menuOpen = !this.menuOpen;
+  }
+
+  openDashboard(){
+    this.router.navigate(['/dashboard']);
+  }
+
+  openWarnings(){
+    this.router.navigate(['/warnings']);
   }
 }
