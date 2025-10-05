@@ -13,4 +13,8 @@
     <kbase name="basicRules" packages="basicRules">
         <ksession name="basic-ksession"/>
     </kbase>
+
+    <kbase name="rulesNewCEP" packages="rules/cepRules" eventProcessingMode="stream">
+        <ksession name="k-session-new-cep" type="stateful" clockType="realtime"/>
+    </kbase>
 </kmodule>

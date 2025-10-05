@@ -3,6 +3,8 @@ package com.ftn.service;
 import com.ftn.model.AirQualityStatus;
 import com.ftn.model.AirQualityCategory;
 import com.ftn.model.AirPollutionEvent;
+import com.ftn.model.messages.Warning;
+import com.ftn.model.*;
 import com.ftn.dto.PollutantHistoryDTO;
 import com.ftn.service.AirQualityService;
 import com.ftn.util.KnowledgeSessionHelper;
@@ -16,6 +18,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.ftn.service.WarningRepository;
+import com.ftn.service.UserRepository;
 
 @RestController
 @RequestMapping("/api/air")
@@ -25,13 +29,18 @@ public class AirQualityController {
     private final KieContainer kieContainer;
     private KieSession kSession;
 
-    private AirQualityStatus sharedStatus;
+    private Warning warning;
+
+    private final WarningRepository warningRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     private AirQualityService airQualityService;
 
-    public AirQualityController(KieContainer kieContainer) {
+    public AirQualityController(KieContainer kieContainer, WarningRepository warningRepository, UserRepository userRepository) {
         this.kieContainer = kieContainer;
+        this.warningRepository = warningRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/pollutants/last24h")
@@ -45,8 +54,8 @@ public class AirQualityController {
         this.kSession = kieContainer.newKieSession("k-session-cep");
 
         // ako koristiš status kao fact:
-        this.sharedStatus = new AirQualityStatus();
-        this.kSession.insert(this.sharedStatus);
+        this.warning = new Warning();
+        this.kSession.insert(this.warning);
 
         // Ako želiš "stalno slušanje", može i:
         // new Thread(kSession::fireUntilHalt).start();
@@ -60,7 +69,7 @@ public class AirQualityController {
 
 
     @PostMapping("/analyzeLongTerm")
-    public synchronized AirQualityStatus analyzeLongTerm(@RequestBody AirPollutionEvent event) {
+    public synchronized Warning analyzeLongTerm(@RequestBody AirPollutionEvent event) {
         long ts = System.currentTimeMillis();  // realtime test; bez ručnog timestamp-a
 
         // debug log *posle* definicije ts
@@ -68,16 +77,22 @@ public class AirQualityController {
         System.out.println("REQ pm25=" + event.getPm25() + ", ts=" + ts + " windSpeed: " + event.getWindSpeed());
 
         // ubaci događaj u ISTU sesiju
-        this.kSession.insert(new AirPollutionEvent(event.getPm25(), event.getPm10(), event.getNo2(),event.getWindSpeed(), ts));
+        this.kSession.insert(new AirPollutionEvent(event.getPm25(), event.getPm10(), event.getNo2(),event.getWindSpeed(), ts, event.getUserEmail()));
 
         // okini pravila
         this.kSession.fireAllRules();
 
         // snapshot shared statusa
-        AirQualityStatus ret = new AirQualityStatus();
-        ret.setCategory(sharedStatus.getCategory());
-        ret.setExplanation(sharedStatus.getExplanation());
-        ret.setRecommendation(sharedStatus.getRecommendation());
-        return ret;
+        Warning w = new Warning();
+        w.setContent(warning.getContent());
+
+        if (w.getContent() != null){
+            User user = userRepository.findByEmail(event.getUserEmail())
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + event.getUserEmail()));
+            w.setUser(user);
+            w.setTimestamp(LocalDateTime.now());
+            warningRepository.save(w);
+        }
+        return w;
     }
 }
