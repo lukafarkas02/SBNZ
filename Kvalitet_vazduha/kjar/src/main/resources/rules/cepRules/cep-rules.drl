@@ -109,13 +109,13 @@ no-loop true
 when
 
     $minPm25 : Number() from accumulate(
-        $e2 : AirPollutionEvent() over window:time(30s),
+        $e2 : AirPollutionEvent() over window:time(5s),
         min($e2.getPm25())
     )
-    eval( $minPm25.doubleValue() > 55.0 )
+    eval( $minPm25.doubleValue() > 45.0 )
 
     $avgWind : Number() from accumulate(
-        $e3 : AirPollutionEvent() over window:time(30s),
+        $e3 : AirPollutionEvent() over window:time(5s),
         average($e3.getWindSpeed())
     )
     eval( $avgWind.doubleValue() < 2.0 )

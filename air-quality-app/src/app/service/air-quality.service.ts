@@ -4,6 +4,7 @@ import { Observable, tap } from 'rxjs';
 import { AirQualityInfoResponse } from '../models/air-quality-info-response.model';
 import { AirQualityRequestDTO } from '../models/air-quality-request-dto.model';
 import { PollutantHistoryDTO } from '../models/pollutant-history-dto.model';
+import { PollutantData } from '../models/pollutant-data.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,12 @@ export class AirQualityService {
   }
 
   private apiUrl = 'http://localhost:8090/api/air';
+
   getLast24hPollutants(): Observable<PollutantHistoryDTO[]> {
     return this.http.get<PollutantHistoryDTO[]>(`${this.apiUrl}/pollutants/last24h`);
+  }
+
+  sendPollutantData(data: PollutantData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/analyzeLongTerm`, data);
   }
 }
