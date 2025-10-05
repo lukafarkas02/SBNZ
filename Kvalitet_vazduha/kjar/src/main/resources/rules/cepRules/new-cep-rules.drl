@@ -1,0 +1,132 @@
+// package rules.cepRules
+
+// import com.ftn.model.*;
+// import com.ftn.model.messages.*;
+// import java.time.LocalDateTime;
+
+// // declare AirQualityInput
+// //     @role(event)
+// //     @timestamp(timestamp)
+// // end
+
+// declare Pollutant
+//     @role(event)
+//     // @timestamp(timestamp)
+// end
+
+// rule "PM2.5 raspon vece od 20 u 2min (DEMO)"
+// dialect "java"
+// no-loop true
+// when
+//     $max : Number() from accumulate(
+//         $p : Pollutant( pollutantType == PollutantType.PM2_5 ) over window:time(2m),
+//         max($p.value)
+//     )
+
+//     $min : Number() from accumulate(
+//         $p : Pollutant( pollutantType == PollutantType.PM2_5 ) over window:time(2m),
+//         min($p.value)
+//     )
+
+//     eval( $max.doubleValue() - $min.doubleValue() > 20.0 )
+// then
+//     Warning warning = new Warning();
+    
+//     String content = "WARNING >> Sudden incrase in pollution!";
+//     LocalDateTime now = LocalDateTime.now();
+
+//     warning.setContent(content);
+//     warning.setTimeStamp(now);
+
+//     insert(warning);
+// end
+
+package rules.cepRules
+
+import com.ftn.model.AirPollutionEvent;
+import com.ftn.model.AirQualityStatus;
+import com.ftn.model.AirQualityCategory;
+
+import com.ftn.model.*;
+import com.ftn.model.messages.*;
+import java.time.LocalDateTime;
+
+declare AirPollutionEvent
+    @role( event )
+    @timestamp( timestamp )
+end
+
+rule "PM2.5 raspon vece od 20 u 2m (DEMO)"
+dialect "java"
+no-loop true
+when
+  $max : Number() from accumulate(
+           $e : AirPollutionEvent() over window:time(2m),
+           max( $e.getPm25() )
+         )
+  $min : Number() from accumulate(
+           $e2 : AirPollutionEvent() over window:time(2m),
+           min( $e2.getPm25() )
+         )
+  eval( $max.doubleValue() - $min.doubleValue() > 20.0 )
+  $warning : Warning()
+then
+    System.out.println(">> Upozorenje institucijama (DEMO): vazduh je OPASAN neprekidno ≥2min!");
+    // Warning warning = new Warning();
+    
+    // String content = "WARNING >> Sudden incrase in pollution!";
+    // LocalDateTime now = LocalDateTime.now();
+
+    // warning.setContent(content);
+    // warning.setTimestamp(now);
+    $warning.setContent("WARNING >> Sudden incrase in pollution!");
+    update($warning);
+end
+
+
+
+// rule "Opasan vazduh - demo 2m, bez prekida"
+// no-loop true
+// when
+    
+//     Number( intValue >= 4 ) from accumulate(
+//         $d: AirPollutionEvent( $d.getPm25() >= 55 ) over window:time(2m),
+//         count($d)
+//     )
+ 
+//     not( $d1: AirPollutionEvent( $d1.getPm25() < 55 ) over window:time(2m) )
+
+//     $status : AirQualityStatus()
+// then
+//     System.out.println(">> Upozorenje institucijama (DEMO): vazduh je OPASAN neprekidno ≥2min!");
+//     $status.setCategory(AirQualityCategory.OPASAN);
+//     $status.setExplanation("PM2.5 ≥ 55 μg/m³ bez prekida u poslednja 2 minuta.");
+//     $status.setRecommendation("Obavestiti institucije; izbegavati boravak na otvorenom.");
+//     update($status);
+// end
+
+
+// rule "Dugotrajno zadržavanje smoga (12h)"
+// dialect "java"
+// no-loop true
+// when
+
+//     $minPm25 : Number() from accumulate(
+//         $e2 : AirPollutionEvent() over window:time(2m),
+//         min($e2.getPm25())
+//     )
+//     eval( $minPm25.doubleValue() > 55.0 )
+
+//     $avgWind : Number() from accumulate(
+//         $e3 : AirPollutionEvent() over window:time(2m),
+//         average($e3.getWindSpeed())
+//     )
+//     eval( $avgWind.doubleValue() < 2.0 )
+
+//     $status : AirQualityStatus()
+// then
+//     System.out.println(">> Upozorenje: dugotrajno zadržavanje smoga (PM2.5 >55 12h, vetar slab)");
+//     $status.setExplanation("PM2.5 je kontinuirano iznad 55 µg/m³ u 12h uz slab vetar.");
+//     $status.setRecommendation("Očekivati zadržavanje smoga; savetovati ograničavanje boravka napolju.");
+//     update($status);
+// end

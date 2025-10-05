@@ -1,15 +1,37 @@
-// package rules.cepRules
+package rules.cepRules
 
-// import com.ftn.model.AirPollutionEvent;
-// import com.ftn.model.AirQualityStatus;
-// import com.ftn.model.AirQualityCategory;
+import com.ftn.model.AirPollutionEvent;
+import com.ftn.model.AirQualityStatus;
+import com.ftn.model.AirQualityCategory;
+import com.ftn.model.messages.Warning;
 
-// declare AirPollutionEvent
-//     @role( event )
-//     @timestamp( timestamp )
-// end
+declare AirPollutionEvent
+    @role( event )
+    @timestamp( timestamp )
+end
 
-// rule "PM2.5 raspon vece od 20 u 2m (DEMO)"
+rule "PM2.5 raspon vece od 20 u 2m"
+dialect "java"
+no-loop true
+when
+  $max : Number() from accumulate(
+           $e : AirPollutionEvent() over window:time(2m),
+           max( $e.getPm25() )
+         )
+  $min : Number() from accumulate(
+           $e2 : AirPollutionEvent() over window:time(2m),
+           min( $e2.getPm25() )
+         )
+  eval( $max.doubleValue() - $min.doubleValue() > 20.0 )
+  $warning : Warning()
+then
+  System.out.println(">> Upozorenje: veliki porast PM2.5 (max-min > 20 u 2m)");
+  $warning.setContent("WARNING >> Sudden incrase in pollution!");
+  // $status.setRecommendation("Pojačati monitoring i informisati javnost.");
+  update($warning);
+end
+
+// rule "PM2.5 raspon vece od 20 u 2m"
 // dialect "java"
 // no-loop true
 // when
@@ -22,58 +44,87 @@
 //            min( $e2.getPm25() )
 //          )
 //   eval( $max.doubleValue() - $min.doubleValue() > 20.0 )
-//   $status : AirQualityStatus()
+//   $warning : Warning(active == false)
 // then
 //   System.out.println(">> Upozorenje: veliki porast PM2.5 (max-min > 20 u 2m)");
-//   $status.setExplanation("Razlika PM2.5 u 2 minuta veća od 20 μg/m³ (demo).");
-//   $status.setRecommendation("Pojačati monitoring i informisati javnost.");
-//   update($status);
+//   $warning.setContent("WARNING >> Sudden incrase in pollution!");
+//   $warning.setActive(true);
+//   // $status.setRecommendation("Pojačati monitoring i informisati javnost.");
+//   update($warning);
 // end
 
-
-
-// rule "Opasan vazduh - demo 2m, bez prekida"
-// no-loop true
-// when
-    
-//     Number( intValue >= 4 ) from accumulate(
-//         $d: AirPollutionEvent( $d.getPm25() >= 55 ) over window:time(2m),
-//         count($d)
-//     )
- 
-//     not( $d1: AirPollutionEvent( $d1.getPm25() < 55 ) over window:time(2m) )
-
-//     $status : AirQualityStatus()
-// then
-//     System.out.println(">> Upozorenje institucijama (DEMO): vazduh je OPASAN neprekidno ≥2min!");
-//     $status.setCategory(AirQualityCategory.OPASAN);
-//     $status.setExplanation("PM2.5 ≥ 55 μg/m³ bez prekida u poslednja 2 minuta.");
-//     $status.setRecommendation("Obavestiti institucije; izbegavati boravak na otvorenom.");
-//     update($status);
-// end
-
-
-// rule "Dugotrajno zadržavanje smoga (12h)"
+// rule "PM2.5 stabilizacija (<10 u 2m)"
 // dialect "java"
 // no-loop true
 // when
-
-//     $minPm25 : Number() from accumulate(
-//         $e2 : AirPollutionEvent() over window:time(2m),
-//         min($e2.getPm25())
-//     )
-//     eval( $minPm25.doubleValue() > 55.0 )
-
-//     $avgWind : Number() from accumulate(
-//         $e3 : AirPollutionEvent() over window:time(2m),
-//         average($e3.getWindSpeed())
-//     )
-//     eval( $avgWind.doubleValue() < 2.0 )
-
-//     $status : AirQualityStatus()
+//   $max : Number() from accumulate(
+//            $e : AirPollutionEvent() over window:time(2m),
+//            max( $e.getPm25() )
+//          )
+//   $min : Number() from accumulate(
+//            $e2 : AirPollutionEvent() over window:time(2m),
+//            min( $e2.getPm25() )
+//          )
+//   eval( $max.doubleValue() - $min.doubleValue() < 10.0 )
+//   $warning : Warning(active == true)
 // then
-//     System.out.println(">> Upozorenje: dugotrajno zadržavanje smoga (PM2.5 >55 12h, vetar slab)");
-//     $status.setExplanation("PM2.5 je kontinuirano iznad 55 µg/m³ u 12h uz slab vetar.");
-//     $status.setRecommendation("Očekivati zadržavanje smoga; savetovati ograničavanje boravka napolju.");
-//     update($status);
+//   System.out.println("PM2.5 se stabilizovao (razlika < 10) — resetujem upozorenje");
+//   $warning.setActive(false);
+//   $warning.setContent("PM2.5 levels have stabilized");
+//   update($warning);
 // end
+
+rule "Opasan vazduh - demo 2m, bez prekida"
+no-loop true
+when
+    
+    Number( intValue >= 4 ) from accumulate(
+        $d: AirPollutionEvent( 
+                               $d.getPm25() >= 55 ||
+                               $d.getPm10() >= 100 ||
+                               $d.getNo2() >= 180 ||
+                               $d.getO3() >= 180 
+        ) over window:time(30s),
+        count($d)
+    )
+ 
+    // not( $d1: AirPollutionEvent( $d1.getPm25() < 55 ) over window:time(30s) )
+    // not( $d1: AirPollutionEvent( $d1.getPm10() < 100 ) over window:time(30s) )
+    // not( $d1: AirPollutionEvent( $d1.getNo2() < 180 ) over window:time(30s) )
+    // not( $d1: AirPollutionEvent( $d1.getO3() < 180 ) over window:time(30s) )
+
+    $warning : Warning()
+then
+    System.out.println(">> Upozorenje institucijama (DEMO): vazduh je OPASAN neprekidno ≥2min!");
+    $warning.setContent("Air quality has been hazardous for the last 6 hours. Limit outdoor activities.");
+    // $status.setCategory(AirQualityCategory.HAZARDOUS);
+    // $status.setExplanation("PM2.5 ≥ 55 μg/m³ bez prekida u poslednja 2 minuta.");
+    // $status.setRecommendation("Obavestiti institucije; izbegavati boravak na otvorenom.");
+    update($warning);
+end
+
+rule "Dugotrajno zadržavanje smoga (12h)"
+dialect "java"
+no-loop true
+when
+
+    $minPm25 : Number() from accumulate(
+        $e2 : AirPollutionEvent() over window:time(30s),
+        min($e2.getPm25())
+    )
+    eval( $minPm25.doubleValue() > 55.0 )
+
+    $avgWind : Number() from accumulate(
+        $e3 : AirPollutionEvent() over window:time(30s),
+        average($e3.getWindSpeed())
+    )
+    eval( $avgWind.doubleValue() < 2.0 )
+
+    $warning : Warning()
+then
+    System.out.println(">> Upozorenje: dugotrajno zadržavanje smoga (PM2.5 >55 12h, vetar slab)");
+    $warning.setContent("WARNING >> Prolonged smog detected!");
+    // $status.setExplanation("PM2.5 je kontinuirano iznad 55 µg/m³ u 12h uz slab vetar.");
+    // $status.setRecommendation("Očekivati zadržavanje smoga; savetovati ograničavanje boravka napolju.");
+    update($warning);
+end

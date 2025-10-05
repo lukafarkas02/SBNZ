@@ -18,6 +18,8 @@ public class AirPollutionEvent {
 
     private long timestamp;  // vreme merenja
 
+    private String userEmail;
+
     // === Konstruktor bez argumenata (potreban za Drools) ===
     public AirPollutionEvent() {
     }
@@ -26,7 +28,7 @@ public class AirPollutionEvent {
     public AirPollutionEvent(double pm25, double pm10, double no2, double o3, double co2,
                              double windSpeed, boolean precipitation,
                              double temperature, double humidity, double pressure,
-                             long timestamp) {
+                             long timestamp, String userEmail) {
         this.pm25 = pm25;
         this.pm10 = pm10;
         this.no2 = no2;
@@ -38,14 +40,16 @@ public class AirPollutionEvent {
         this.humidity = humidity;
         this.pressure = pressure;
         this.timestamp = timestamp;
+        this.userEmail = userEmail;
     }
 
-     public AirPollutionEvent(double pm25, double pm10, double no2, double windSpeed, long timestamp) {
+     public AirPollutionEvent(double pm25, double pm10, double no2, double windSpeed, long timestamp, String userEmail) {
         this.pm10 = pm10;
         this.pm25 = pm25;
         this.no2 = no2;
         this.windSpeed = windSpeed;
         this.timestamp = timestamp;
+        this.userEmail = userEmail;
      }
 
     // === Getteri i setteri ===
@@ -136,6 +140,15 @@ public class AirPollutionEvent {
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
+
+     public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
+
 
     @Override
     public String toString() {
