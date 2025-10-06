@@ -5,13 +5,15 @@ import { DashboardComponent } from './dashboard/dashboard/dashboard.component';
 import { AppComponent } from './app.component';
 import { NgModule } from '@angular/core';
 import { WarningsComponent } from './warnings/warnings.component';
+import { RecommendationsComponent } from './recommendations/recommendations.component';
 
 export const routes: Routes = [
     { path: '', component: RegisterComponent },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
     { path: 'dashboard', component: DashboardComponent },
-    { path: 'warnings', component: WarningsComponent }
+    { path: 'warnings', component: WarningsComponent },
+    { path: 'recommendations', component: RecommendationsComponent }
 ];
 
 @NgModule({
