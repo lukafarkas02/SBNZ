@@ -16,6 +16,7 @@ import com.ftn.service.UserRepository;
 
 @RestController
 @RequestMapping("/api/backward")
+@CrossOrigin(origins = "http://localhost:4200")
 public class BackwardController {
 
     private final KieContainer kieContainer;

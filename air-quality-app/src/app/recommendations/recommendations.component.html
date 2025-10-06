@@ -1,0 +1,99 @@
+<!-- <app-navigation></app-navigation>
+<div class="container">
+  <h1>Air Quality Backward Analysis</h1>
+
+  <div class="pollutant-table-container">
+    <h2>Current Pollutant Values</h2>
+    <table class="pollutant-table">
+      <thead>
+        <tr>
+          <th>Pollutant</th>
+          <th>PM2.5 (µg/m³)</th>
+          <th>PM10 (µg/m³)</th>
+          <th>NO₂ (µg/m³)</th>
+          <th>O₃ (µg/m³)</th>
+          <th>Wind Speed (m/s)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Value</td>
+          <td>{{pollutants.pm25}}</td>
+          <td>{{pollutants.pm10}}</td>
+          <td>{{pollutants.no2}}</td>
+          <td>{{pollutants.o3}}</td>
+          <td>{{pollutants.windSpeed}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="action-buttons">
+    <div class="action">
+      <button (click)="checkSafety()">Is it safe to go outside?</button>
+      <div class="result" *ngIf="safetyResult">
+        <strong>{{ safetyResult.isSafe ? 'SAFE' : 'NOT SAFE' }}</strong>
+        <p>{{ safetyResult.message }}</p>
+      </div>
+    </div>
+
+    <div class="action">
+      <button (click)="checkMask()">Do I need to wear a mask?</button>
+      <div class="result" *ngIf="maskResult">
+        <strong>{{ maskResult.isRequired ? 'MASK REQUIRED' : 'MASK NOT REQUIRED' }}</strong>
+        <p>{{ maskResult.message }}</p>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<app-navigation></app-navigation>
+<div class="container">
+  <h1>Air Quality Backward Analysis</h1>
+
+  <div class="pollutant-table-container">
+    <h2>Current Pollutant Values</h2>
+    <table class="pollutant-table">
+      <thead>
+        <tr>
+          <th>Pollutant</th>
+          <th>PM2.5 (µg/m³)</th>
+          <th>PM10 (µg/m³)</th>
+          <th>NO₂ (µg/m³)</th>
+          <th>O₃ (µg/m³)</th>
+          <th>Wind Speed (m/s)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Value</td>
+          <td>{{pollutants.pm25}}</td>
+          <td>{{pollutants.pm10}}</td>
+          <td>{{pollutants.no2}}</td>
+          <td>{{pollutants.o3}}</td>
+          <td>{{pollutants.windSpeed}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="action-buttons">
+    <div class="action">
+      <button (click)="checkSafety()">Is it safe to go outside?</button>
+      <div class="result" *ngIf="safetyResult">
+        <strong>{{ safetyResult.hazardous ? 'NOT SAFE' : 'SAFE' }}</strong>
+        <p><b>Explanation:</b> {{ safetyResult.explanation }}</p>
+        <p><b>Recommendation:</b> {{ safetyResult.recommendation }}</p>
+      </div>
+    </div>
+
+    <div class="action">
+      <button (click)="checkMask()">Do I need to wear a mask?</button>
+      <div class="result" *ngIf="maskResult">
+        <strong>{{ maskResult.shouldWearMask ? 'MASK REQUIRED' : 'MASK NOT REQUIRED' }}</strong>
+        <p><b>Message:</b> {{ maskResult.message }}</p>
+        <p><b>Risk Message:</b> {{ maskResult.rsikMessage }}</p>
+      </div>
+    </div>
+  </div>
+</div>

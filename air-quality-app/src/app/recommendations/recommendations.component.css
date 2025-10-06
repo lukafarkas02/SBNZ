@@ -1,0 +1,84 @@
+.container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: #f7f9fc;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 2rem;
+}
+
+.pollutant-table-container h2 {
+  color: #34495e;
+  margin-bottom: 1rem;
+}
+
+.pollutant-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+}
+
+.pollutant-table th, .pollutant-table td {
+  padding: 0.75rem 1rem;
+  border: 1px solid #dfe6e9;
+  text-align: center;
+}
+
+.pollutant-table th {
+  background-color: #74b9ff;
+  color: #fff;
+  font-weight: 600;
+}
+
+.pollutant-table tbody tr:nth-child(even) {
+  background-color: #dfe6e9;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.action button {
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  background-color: #0984e3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.action button:hover {
+  background-color: #74b9ff;
+}
+
+.result {
+  margin-top: 0.5rem;
+  padding: 1rem;
+  border-left: 4px solid #0984e3;
+  background-color: #dfe6e9;
+  border-radius: 6px;
+}
+
+.result strong {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 0.3rem;
+  color: #2d3436;
+}
+
+.result p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #2d3436;
+}

@@ -25,4 +25,8 @@ export class NavigationComponent {
   openWarnings(){
     this.router.navigate(['/warnings']);
   }
+
+  openRecommendations(){
+    this.router.navigate(['/recommendations']);
+  }
 }
