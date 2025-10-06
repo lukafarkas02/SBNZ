@@ -30,40 +30,22 @@
 //     // --- ROOT: izdati upozorenje (opasan) ---
 //     // tražimo: (SeverePollution OR MultiPollutantHigh) AND (UnfavorableWeather) 
 //     // i po mogućnosti SensitiveUser za jače preporuke
-//     insert( new HypothesisDependency(
-//         "IssueAlertOpasan",
-//         Arrays.asList("OverallStatusOpasan", "UnfavorableWeather")
-//     ) );
+//     insert( new HypothesisDependency( "IssueAlertOpasan", Arrays.asList("OverallStatusOpasan", "UnfavorableWeather")) );
 
 //     // Za personalizovanu eskalaciju: root+SensitiveUser => "StrongProtectAdvice"
-//     insert( new HypothesisDependency(
-//         "StrongProtectAdvice",
-//         Arrays.asList("IssueAlertOpasan", "SensitiveUser")
-//     ) );
+//     insert( new HypothesisDependency( "StrongProtectAdvice", Arrays.asList("IssueAlertOpasan", "SensitiveUser") ) );
 
 //     // --- “Opasan” status izvođen iz polutanata ---
-//     insert( new HypothesisDependency(
-//         "OverallStatusOpasan",
-//         Arrays.asList("SeverePollution") // ili "MultiPollutantHigh"
-//     ) );
+//     insert( new HypothesisDependency( "OverallStatusOpasan", Arrays.asList("SeverePollution") ) );
 
 //     // Jedan jako visok polutant dovoljan
-//     insert( new HypothesisDependency(
-//         "SeverePollution",
-//         Arrays.asList("PM25_Opasan_OR_PM10_Opasan_OR_NO2_Opasan_OR_O3_Opasan")
-//     ) );
+//     insert( new HypothesisDependency( "SeverePollution", Arrays.asList("PM25_Opasan_OR_PM10_Opasan_OR_NO2_Opasan_OR_O3_Opasan") ) );
 
 //     // Vremenski uslovi koji pogoršavaju disperziju
-//     insert( new HypothesisDependency(
-//         "UnfavorableWeather",
-//         Arrays.asList("LowWind_OR_NoPrecip")
-//     ) );
+//     insert( new HypothesisDependency( "UnfavorableWeather",  Arrays.asList("LowWind_OR_NoPrecip") ) );
 
 //     // --- Sensitive user (profil) ---
-//     insert( new HypothesisDependency(
-//         "SensitiveUser",
-//         Arrays.asList("IsChild_OR_Elderly_OR_Chronic_OR_Pregnant")
-//     ) );
+//     insert( new HypothesisDependency( "SensitiveUser", Arrays.asList("IsChild_OR_Elderly_OR_Chronic_OR_Pregnant") ) );
 // end
 
 // // =====================================================================

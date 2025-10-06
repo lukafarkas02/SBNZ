@@ -17,4 +17,12 @@
     <kbase name="rulesNewCEP" packages="rules/cepRules" eventProcessingMode="stream">
         <ksession name="k-session-new-cep" type="stateful" clockType="realtime"/>
     </kbase>
+
+    <kbase name="backward-hazardous-quality-kbase" packages="backward">
+        <ksession name="backward-hazardous-quality-ksession"/>
+    </kbase>
+
+    <kbase name="backward-mask-kbase" packages="backwardMask">
+        <ksession name="backward-mask-ksession"/>
+    </kbase>
 </kmodule>

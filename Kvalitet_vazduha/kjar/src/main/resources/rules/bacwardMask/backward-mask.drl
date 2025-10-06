@@ -1,0 +1,112 @@
+package rules.backwardMask
+
+import java.util.Arrays;
+import java.util.List;
+
+import com.ftn.model.AirPollutionEvent;
+import com.ftn.model.User;
+import com.ftn.model.RiskType;
+import com.ftn.dto.*;
+
+// =====================================================================
+declare HypothesisDependency
+    conclusion     : String
+    prerequisites  : java.util.List
+end
+
+// =====================================================================
+// Inicijalizacija stabla zavisnosti za "ShouldWearMask"
+// =====================================================================
+rule "Init dependencies for Mask Recommendation backward"
+salience 100
+when
+    not( HypothesisDependency() )
+then
+    System.out.println(">> Init backward dependencies for Mask Recommendation...");
+
+    // Glavni zaključak: korisnik treba da nosi masku
+    insert( new HypothesisDependency("ShouldWearMask", Arrays.asList("PollutionHighOrWorse", "LowWind")) );
+
+    // Ako je korisnik rizičan + treba nositi masku → preporuka za jaču zaštitu
+    insert( new HypothesisDependency("StrongMaskAdvice", Arrays.asList("ShouldWearMask", "SensitiveUser")) );
+
+    // Povišeno zagađenje – "loš" ili "opasan"
+    insert( new HypothesisDependency("PollutionHighOrWorse", Arrays.asList("PM25_High_OR_PM10_High_OR_NO2_High_OR_O3_High")) );
+
+    // Rizičan korisnik
+    insert( new HypothesisDependency("SensitiveUser", Arrays.asList("IsChild_OR_Elderly_OR_Chronic_OR_Pregnant")) );
+end
+
+// =====================================================================
+// BAZNI USLOVI + rekurzivna provera
+// =====================================================================
+query proveMask(String $h)
+    (
+        // PM2.5
+        ( eval($h.equals("PM25_High")) and exists AirPollutionEvent( pm25 > 35 ) ) or
+        // PM10
+        ( eval($h.equals("PM10_High")) and exists AirPollutionEvent( pm10 > 50 ) ) or
+        // NO2
+        ( eval($h.equals("NO2_High")) and exists AirPollutionEvent( no2 > 100 ) ) or
+        // O3
+        ( eval($h.equals("O3_High")) and exists AirPollutionEvent( o3 > 140 ) ) or
+
+        // Kombinovani OR za visok nivo bilo kog polutanta
+        ( eval($h.equals("PM25_High_OR_PM10_High_OR_NO2_High_OR_O3_High")) and 
+            ( exists AirPollutionEvent( pm25 > 35 ) or
+              exists AirPollutionEvent( pm10 > 50 ) or
+              exists AirPollutionEvent( no2 > 100 ) or
+              exists AirPollutionEvent( o3 > 140 ) ) ) or
+
+        // Slab vetar
+        ( eval($h.equals("LowWind")) and exists AirPollutionEvent( windSpeed < 2.0 ) ) or
+
+        // Profil korisnika
+        ( eval($h.equals("IsChild"))    and exists User( riskType == RiskType.CHILD ) ) or
+        ( eval($h.equals("IsElderly"))  and exists User( riskType == RiskType.ELDERLY ) ) or
+        ( eval($h.equals("IsChronic"))  and exists User( riskType == RiskType.CHRONIC ) ) or
+        ( eval($h.equals("IsPregnant")) and exists User( riskType == RiskType.PREGNANT ) ) or
+        ( eval($h.equals("IsChild_OR_Elderly_OR_Chronic_OR_Pregnant")) and 
+            exists User( riskType in (RiskType.CHILD, RiskType.ELDERLY, RiskType.CHRONIC, RiskType.PREGNANT) ) )
+    )
+    or
+    (
+        $z : HypothesisDependency( conclusion == $h )
+        and not(
+            String($p: this) from $z.prerequisites
+            and not proveMask($p;)
+        )
+    )
+end
+
+// =====================================================================
+// ZAKLJUČCI
+// =====================================================================
+
+// Preporuka za nošenje maske
+rule "Confirm mask recommendation via backward reasoning"
+salience 10
+no-loop true
+when
+    proveMask("ShouldWearMask";)
+    $mask : MaskRecommendationResponse()
+then
+    System.out.println(">> PREPORUKA: KORISNIK TREBA DA NOSI MASKU (povišeno zagađenje + slab vetar).");
+    $mask.setShouldWearMask(true);
+    $mask.setMessage(">> RECOMMENDATION: You need to wear a mask!");
+    update($mask);
+end
+
+// Jača preporuka za rizične korisnike
+rule "Stronger mask advice for sensitive users"
+salience 9
+no-loop true
+when
+    proveMask("StrongMaskAdvice";)
+    $mask : MaskRecommendationResponse()
+then
+    System.out.println(">> POSEBNO ZA RIZIČNE GRUPE: OBAVEZNO NOŠENJE P2/P3 MASKE NA OTVORENOM.");
+    $mask.setStrongAdvice(true);
+    $mask.setRiskMessage(">> ESPECIALLY FOR RISK GROUPS: MANDATORY WEARING OF P2/P3 MASK OUTDOORS.");
+    update($mask);
+end

@@ -19,4 +19,12 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <kbase name="basicRules" packages="rules/basicRules">
         <ksession name="basic-ksession"/>
     </kbase>
+
+    <kbase name="backward-hazardous-quality-kbase" packages="rules/backward">
+        <ksession name="backward-hazardous-quality-ksession"/>
+    </kbase>
+
+    <kbase name="backward-mask-kbase" packages="rules/backwardMask">
+        <ksession name="backward-mask-ksession"/>
+    </kbase>
 </kmodule>
