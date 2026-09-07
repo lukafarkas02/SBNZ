@@ -1,0 +1,137 @@
+/* warnings-page.component.css */
+* {
+  box-sizing: border-box;
+}
+
+.warnings-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1.5rem 3rem;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #0077b6, #00b4d8);
+  border-radius: 20px;
+  padding: 1.75rem 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 119, 182, 0.25);
+}
+
+.page-icon {
+  font-size: 2.4rem;
+  flex-shrink: 0;
+}
+
+.page-header h1 {
+  margin: 0 0 4px;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1.9rem;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.current-reading-card,
+.demo-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.card-icon {
+  font-size: 1.3rem;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #1a1a2e;
+  font-weight: 700;
+}
+
+.reading-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.reading-item {
+  flex: 1;
+  min-width: 100px;
+  background: #f6f8fb;
+  border-radius: 10px;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+.reading-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+
+.reading-value {
+  display: block;
+  font-weight: 700;
+  color: #1a1a2e;
+  font-size: 0.95rem;
+}
+
+.demo-hint {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  color: #777;
+}
+
+.demo-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.demo-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e2ea;
+  background: #fafafe;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.demo-btn:hover {
+  border-color: #0077b6;
+  background: #f0f8fc;
+  color: #0077b6;
+  transform: translateY(-1px);
+}
+
+.demo-btn-icon {
+  font-size: 1.1rem;
+}

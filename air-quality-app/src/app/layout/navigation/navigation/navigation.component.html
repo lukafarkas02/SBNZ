@@ -1,0 +1,29 @@
+<nav class="nav-container">
+  <div class="logo-section">
+    <span class="logo-icon">🌍</span>
+    <span class="logo-text">AirWatch</span>
+  </div>
+
+  <div class="right-section">
+    <div class="account">
+      <span class="account-avatar">👤</span>
+      <span class="account-name">My Account</span>
+    </div>
+
+    <button class="burger" (click)="toggleMenu()" [class.active]="menuOpen">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+
+  <ul class="dropdown" *ngIf="menuOpen">
+    <li *ngIf="!authService.isAdmin()"><a (click)="openDashboard()"><span class="item-icon">📊</span> Dashboard</a></li>
+    <li *ngIf="!authService.isAdmin()"><a (click)="openWarnings()"><span class="item-icon">⚠️</span> Warnings</a></li>
+    <li *ngIf="!authService.isAdmin()"><a (click)="openRecommendations()"><span class="item-icon">💡</span> Recommendations</a></li>
+
+    <li *ngIf="authService.isAdmin()"><a (click)="openTemplate()"><span class="item-icon">🕒</span> Template</a></li>
+    <li *ngIf="authService.isAdmin()"><a (click)="openAdminMeasurements()"><span class="item-icon">📊</span>All Measurements</a></li>
+    <li *ngIf="authService.isAdmin()"><a (click)="openAdminWarnings()"><span class="item-icon">⚠️</span>All Warnings</a></li>
+  </ul>
+</nav>

@@ -1,0 +1,132 @@
+<app-navigation></app-navigation>
+
+<div class="container">
+
+  <div class="page-header">
+    <span class="page-icon">🔎</span>
+    <div>
+      <h1>Air Quality Backward Analysis</h1>
+      <p class="page-subtitle">Check current conditions and diagnose outdoor activity safety</p>
+    </div>
+  </div>
+
+  <div class="card table-card">
+    <div class="card-accent"></div>
+    <div class="card-header">
+      <span class="card-icon">📋</span>
+      <h2>Current Pollutant & Weather Values</h2>
+    </div>
+
+    <div class="table-scroll">
+      <table class="pollutant-table">
+        <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>PM2.5 <span class="unit">µg/m³</span></th>
+          <th>PM10 <span class="unit">µg/m³</span></th>
+          <th>NO₂ <span class="unit">µg/m³</span></th>
+          <th>O₃ <span class="unit">µg/m³</span></th>
+          <th>Wind <span class="unit">m/s</span></th>
+          <th>Humidity <span class="unit">%</span></th>
+          <th>Temp <span class="unit">°C</span></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td class="row-label">Value</td>
+          <td>{{pollutants.pm25}}</td>
+          <td>{{pollutants.pm10}}</td>
+          <td>{{pollutants.no2}}</td>
+          <td>{{pollutants.o3}}</td>
+          <td>{{pollutants.windSpeed}}</td>
+          <td>{{pollutants.humidity}}</td>
+          <td>{{pollutants.temperature}}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+
+<!--    &lt;!&ndash; Safety check &ndash;&gt;-->
+<!--    <div class="card action-card">-->
+<!--      <div class="card-accent safety-accent"></div>-->
+<!--      <div class="card-header">-->
+<!--        <span class="card-icon">🛡️</span>-->
+<!--        <h2>Quick safety check</h2>-->
+<!--      </div>-->
+
+<!--      <button class="primary-btn" (click)="checkSafety()">-->
+<!--        Is it safe to go outside?-->
+<!--      </button>-->
+
+<!--      <div class="result" [ngClass]="safetyResult?.hazardous ? 'result-bad' : 'result-good'" *ngIf="safetyResult">-->
+<!--        <div class="result-status">-->
+<!--          <span class="status-dot"></span>-->
+<!--          <strong>{{ safetyResult.hazardous ? 'NOT SAFE' : 'SAFE' }}</strong>-->
+<!--        </div>-->
+<!--        <p><b>Explanation:</b> {{ safetyResult.explanation }}</p>-->
+<!--        <p><b>Recommendation:</b> {{ safetyResult.recommendation }}</p>-->
+<!--      </div>-->
+<!--    </div>-->
+
+    <!-- Activity diagnosis -->
+    <div class="card action-card">
+      <div class="card-accent activity-accent"></div>
+      <div class="card-header">
+        <span class="card-icon">🏃</span>
+        <h2>Outdoor Activity Diagnosis</h2>
+      </div>
+
+      <div class="activity-panel">
+        <div class="form-group">
+          <label>Activity</label>
+          <select [(ngModel)]="selectedActivity">
+            <option value="DOG_WALKING">Dog walking</option>
+            <option value="CASUAL_WALKING">Casual walking</option>
+            <option value="CYCLING">Cycling</option>
+            <option value="RUNNING">Running</option>
+            <option value="OUTDOOR_FOOTBALL">Outdoor football</option>
+            <option value="CHILD_PLAYGROUND">Child playground</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Duration (minutes)</label>
+          <input type="number" [(ngModel)]="durationMinutes" placeholder="e.g. 30" />
+        </div>
+
+        <button class="primary-btn" (click)="diagnoseActivity()">
+          Start diagnosis
+        </button>
+      </div>
+
+      <div class="result" [ngClass]="activityResult?.safe ? 'result-good' : 'result-bad'" *ngIf="activityResult">
+        <div class="result-status">
+          <span class="status-dot"></span>
+          <strong>{{ activityResult.safe ? 'SAFE' : 'UNSAFE' }}</strong>
+        </div>
+
+        <p>
+          <b>Risk level:</b>
+          <span class="risk-badge" [ngClass]="'risk-' + (activityResult.riskLevel | lowercase)">
+            {{ activityResult.riskLevel }}
+          </span>
+        </p>
+
+        <p><b>Recommendation:</b> {{ activityResult.recommendation }}</p>
+
+        <div class="reasoning" *ngIf="activityResult.reasoningSteps?.length">
+          <b>Backward reasoning:</b>
+          <ul>
+            <li *ngFor="let step of activityResult.reasoningSteps">
+              {{ step }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

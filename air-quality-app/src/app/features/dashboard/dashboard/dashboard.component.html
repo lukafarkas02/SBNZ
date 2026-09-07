@@ -1,0 +1,160 @@
+<app-navigation></app-navigation>
+
+<div class="dashboard-container">
+
+  <div class="welcome-banner">
+    <div class="welcome-text">
+      <h1>Welcome back, {{ userFirstName }} 👋</h1>
+      <p class="welcome-subtitle">Here's your air quality overview for today</p>
+    </div>
+  </div>
+
+  <div class="cards-row">
+
+    <!-- 1. CARD: Current air quality -->
+    <div class="card aqi-card">
+      <div class="card-header">
+        <span class="card-icon">🌫️</span>
+        <h2>Current air quality</h2>
+      </div>
+
+      <div
+        class="aqi-box"
+        [ngStyle]="{
+          'background-color': getAirQualityColor(airQualityInfo?.airCategory)
+        }">
+        {{ airQualityInfo?.airCategory || 'N/A' }}
+      </div>
+    </div>
+
+    <!-- 2. CARD: Weather Conditions -->
+    <div class="card chart-card">
+      <div class="card-header">
+        <span class="card-icon">🌤️</span>
+        <h2>Weather Conditions</h2>
+      </div>
+
+      <table class="data-table">
+        <tbody>
+        <tr>
+          <td>Temperature</td>
+          <td><strong>{{ weatherConditions.temperature }} °C</strong></td>
+        </tr>
+        <tr>
+          <td>Humidity</td>
+          <td><strong>{{ weatherConditions.humidity }} %</strong></td>
+        </tr>
+        <tr>
+          <td>Wind Speed</td>
+          <td><strong>{{ weatherConditions.windSpeed }} m/s</strong></td>
+        </tr>
+        <tr>
+          <td>Pressure</td>
+          <td><strong>{{ weatherConditions.pressure }} hPa</strong></td>
+        </tr>
+        </tbody>
+      </table>
+
+      <p class="weather-impact" *ngIf="weatherConditions.weatherImpact">
+        <em>Impact: {{ weatherConditions.weatherImpact }}</em>
+      </p>
+    </div>
+
+    <!-- 3. CARD: Current pollutants -->
+    <div class="card pollutants-card">
+      <div class="card-header">
+        <span class="card-icon">🧪</span>
+        <h2>Current pollutants values</h2>
+      </div>
+
+      <table>
+        <thead>
+        <tr>
+          <th>Pollutant</th>
+          <th>Value</th>
+          <th>Status</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let pollutant of pollutants">
+          <td>{{ pollutant.pollutantType }}</td>
+          <td>{{ pollutant.value }}</td>
+          <td>
+            <span class="badge" [style.background-color]="getAirQualityColor(pollutant.status)">
+              {{ pollutant.status || 'N/A' }}
+            </span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM: Recommendations and warnings -->
+  <div class="alerts">
+    <div class="card-header">
+      <span class="card-icon">⚠️</span>
+      <h2>Recommendations and warnings</h2>
+    </div>
+
+    <ng-container *ngIf="hasMessages; else noMessages">
+
+      <ul *ngIf="outdoorActivityMessages.length > 0">
+        <li *ngFor="let message of outdoorActivityMessages">
+          {{ message }}
+        </li>
+      </ul>
+
+      <ul *ngIf="healthMessages.length > 0">
+        <li *ngFor="let message of healthMessages">
+          {{ message }}
+        </li>
+      </ul>
+
+      <ul *ngIf="institutionMessages.length > 0">
+        <li *ngFor="let message of institutionMessages">
+          {{ message }}
+        </li>
+      </ul>
+
+    </ng-container>
+
+    <ng-template #noMessages>
+      <p class="no-messages">No recommendations are currently available.</p>
+    </ng-template>
+  </div>
+
+  <!-- LEGEND: Air Quality Index scale -->
+  <div class="legend-card">
+    <div class="card-header">
+      <span class="card-icon">📊</span>
+      <h2>Air quality index legend</h2>
+    </div>
+
+    <div class="legend-grid">
+      <div class="legend-item">
+        <span class="legend-dot" style="background-color:#2e7d32;"></span>
+        <span class="legend-label">Good</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background:#9ccc65;"></span>
+        <span class="legend-label">Moderate</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background-color:#f9a825;"></span>
+        <span class="legend-label">Poor</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background-color:#e64a19;"></span>
+        <span class="legend-label">Very Poor</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-dot" style="background-color:#7b1fa2;"></span>
+        <span class="legend-label">Hazardous</span>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,66 @@
+<!-- warnings-page.component.html -->
+<app-navigation></app-navigation>
+
+<div class="warnings-container">
+
+  <div class="page-header">
+    <span class="page-icon">📡</span>
+    <div>
+      <h1>Real-Time Air Quality Warnings</h1>
+      <p class="page-subtitle">Complex event patterns detected from live sensor readings</p>
+    </div>
+  </div>
+
+  <div class="current-reading-card" *ngIf="currentReading">
+    <div class="card-header">
+      <span class="card-icon">📊</span>
+      <h2>Current Measurement</h2>
+    </div>
+    <div class="reading-grid">
+      <div class="reading-item">
+        <span class="reading-label">PM2.5</span>
+        <span class="reading-value">{{ currentReading.pm25 }} µg/m³</span>
+      </div>
+      <div class="reading-item">
+        <span class="reading-label">PM10</span>
+        <span class="reading-value">{{ currentReading.pm10 }} µg/m³</span>
+      </div>
+      <div class="reading-item">
+        <span class="reading-label">NO₂</span>
+        <span class="reading-value">{{ currentReading.no2 }} µg/m³</span>
+      </div>
+      <div class="reading-item">
+        <span class="reading-label">O₃</span>
+        <span class="reading-value">{{ currentReading.o3 }} µg/m³</span>
+      </div>
+      <div class="reading-item">
+        <span class="reading-label">Wind</span>
+        <span class="reading-value">{{ currentReading.windSpeed }} m/s</span>
+      </div>
+      <div class="reading-item">
+        <span class="reading-label">Humidity</span>
+        <span class="reading-value">{{ currentReading.humidity }} %</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-card">
+    <div class="card-header">
+      <span class="card-icon">🎛️</span>
+      <h2>Demo Controls</h2>
+    </div>
+    <p class="demo-hint">Manually trigger a scenario to see the matching CEP rule fire immediately.</p>
+    <div class="demo-buttons">
+      <button
+        class="demo-btn"
+        *ngFor="let scenario of demoScenarios"
+        (click)="runScenario(scenario.key)">
+        <span class="demo-btn-icon">{{ scenario.icon }}</span>
+        {{ scenario.label }}
+      </button>
+    </div>
+  </div>
+
+  <app-live-alerts-feed [newAlerts]="latestAlerts"></app-live-alerts-feed>
+
+</div>

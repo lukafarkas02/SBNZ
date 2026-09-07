@@ -1,0 +1,249 @@
+* {
+  box-sizing: border-box;
+}
+
+.dashboard-container {
+  padding: 2rem 2.5rem 3.5rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', sans-serif;
+  background: #f6f8fb;
+  font-size: 17px;
+}
+
+/* Welcome banner */
+.welcome-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #0077b6, #00b4d8);
+  border-radius: 20px;
+  padding: 2rem 2.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 119, 182, 0.25);
+}
+
+.welcome-text h1 {
+  margin: 0 0 6px;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 2.4rem;
+  letter-spacing: -0.3px;
+}
+
+.welcome-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.cards-row {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  flex: 1;
+  min-width: 280px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.2rem;
+}
+
+.card-icon {
+  font-size: 1.6rem;
+}
+
+.card-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1a1a2e;
+  font-weight: 700;
+}
+
+/* AQI card */
+.aqi-card {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.aqi-box {
+  width: 100%;
+  max-width: 220px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  color: white;
+  font-weight: 700;
+  font-size: 1.6rem;
+  margin-top: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-transform: capitalize;
+}
+
+/* Weather table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table td {
+  padding: 10px 4px;
+  font-size: 1.05rem;
+  color: #444;
+  border-bottom: 1px solid #eee;
+}
+
+.data-table td:last-child {
+  text-align: right;
+  color: #1a1a2e;
+  font-weight: 600;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.weather-impact {
+  margin-top: 16px;
+  font-size: 1rem;
+  color: #777;
+}
+
+/* Pollutants table */
+.pollutants-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pollutants-card th {
+  text-align: left;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #999;
+  padding: 8px;
+  border-bottom: 2px solid #eee;
+}
+
+.pollutants-card td {
+  padding: 10px 8px;
+  font-size: 1.05rem;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Alerts */
+.alerts {
+  background: #fff5f5;
+  border: 1px solid #ffd6d6;
+  padding: 1.75rem;
+  border-radius: 18px;
+  margin-bottom: 1.75rem;
+}
+
+.alerts .card-header h2 {
+  font-size: 1.25rem;
+}
+
+.alerts ul {
+  margin: 0.75rem 0 0.75rem 1.4rem;
+  padding: 0;
+}
+
+.alerts li {
+  margin-bottom: 8px;
+  color: #5c2b2b;
+  font-size: 1.05rem;
+}
+
+.no-messages {
+  color: #777;
+  font-style: italic;
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+/* Legend */
+.legend-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.legend-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: #f6f8fb;
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+
+.legend-dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .cards-row {
+    flex-direction: column;
+  }
+
+  .welcome-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .welcome-text h1 {
+    font-size: 1.8rem;
+  }
+}
