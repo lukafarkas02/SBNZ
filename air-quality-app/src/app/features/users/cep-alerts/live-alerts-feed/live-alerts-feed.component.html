@@ -1,0 +1,30 @@
+<!-- live-alerts-feed.component.html -->
+<div class="feed-card">
+  <div class="feed-header">
+    <span class="feed-icon">📡</span>
+    <h2>Live Air Quality Alerts</h2>
+    <span class="feed-count" *ngIf="alerts.length > 0">{{ alerts.length }}</span>
+  </div>
+
+  <div class="feed-list" *ngIf="alerts.length > 0; else emptyState">
+    <div
+      class="alert-item"
+      *ngFor="let alert of alerts; trackBy: trackByAlert"
+      [ngClass]="'severity-' + alert.severity">
+
+      <div class="alert-icon-badge">{{ alert.icon }}</div>
+
+      <div class="alert-body">
+        <div class="alert-top-row">
+          <span class="alert-label">{{ alert.label }}</span>
+          <span class="alert-time">{{ timeAgo(alert.timestamp) }}</span>
+        </div>
+        <p class="alert-content">{{ alert.content }}</p>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #emptyState>
+    <p class="empty-message">No alerts yet - monitoring air quality in real time.</p>
+  </ng-template>
+</div>

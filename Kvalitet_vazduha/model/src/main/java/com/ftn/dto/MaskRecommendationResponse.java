@@ -1,5 +1,6 @@
 package com.ftn.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MaskRecommendationResponse {
@@ -8,14 +9,18 @@ public class MaskRecommendationResponse {
     private boolean strongAdvice;
     private String message;
     private String riskMessage;
+    private List<String> reasoningSteps = new ArrayList<>(); // <-- Додата листа за кораке backward анализе
 
     public MaskRecommendationResponse() {}
 
-    public MaskRecommendationResponse(boolean shouldWearMask, boolean strongAdvice, String message, String riskMessage) {
+    public MaskRecommendationResponse(boolean shouldWearMask, boolean strongAdvice, String message, String riskMessage, List<String> reasoningSteps) {
         this.shouldWearMask = shouldWearMask;
         this.strongAdvice = strongAdvice;
         this.message = message;
         this.riskMessage = riskMessage;
+        if (reasoningSteps != null) {
+            this.reasoningSteps = reasoningSteps;
+        }
     }
 
     public boolean isShouldWearMask() {
@@ -42,7 +47,8 @@ public class MaskRecommendationResponse {
         this.message = message;
     }
 
-    public String getRsikMessage() {   
+    // Исправљен назив гетера (са getRsikMessage на getRiskMessage)
+    public String getRiskMessage() {   
         return riskMessage;
     }
 
@@ -50,4 +56,11 @@ public class MaskRecommendationResponse {
         this.riskMessage = riskMessage;
     }
 
+    public List<String> getReasoningSteps() {
+        return reasoningSteps;
+    }
+
+    public void setReasoningSteps(List<String> reasoningSteps) {
+        this.reasoningSteps = reasoningSteps;
+    }
 }

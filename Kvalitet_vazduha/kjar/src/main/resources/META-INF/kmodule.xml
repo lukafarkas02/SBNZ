@@ -1,15 +1,9 @@
 <kmodule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://jboss.org/kie/6.0.0/kmodule">
-    <kbase name="rulesAir" packages="airRules">
-        <ksession name="k-session-air"/>
-    </kbase>
+
     <kbase name="rulesCEP" packages="cepRules" eventProcessingMode="stream">
         <ksession name="k-session-cep" type="stateful" clockType="realtime"/>
     </kbase>
-
-        <kbase name="backward-kbase" packages="backward">
-        <ksession name="backward-ksession"/>
-    </kbase>
-
+        
     <kbase name="basicRules" packages="basicRules">
         <ksession name="basic-ksession"/>
     </kbase>
@@ -18,11 +12,7 @@
         <ksession name="k-session-new-cep" type="stateful" clockType="realtime"/>
     </kbase>
 
-    <kbase name="backward-hazardous-quality-kbase" packages="backward">
-        <ksession name="backward-hazardous-quality-ksession"/>
-    </kbase>
-
-    <kbase name="backward-mask-kbase" packages="backwardMask">
-        <ksession name="backward-mask-ksession"/>
+    <kbase name="backward-activity-kbase" packages="backwardActivity">
+        <ksession name="backward-activity-ksession"/>
     </kbase>
 </kmodule>

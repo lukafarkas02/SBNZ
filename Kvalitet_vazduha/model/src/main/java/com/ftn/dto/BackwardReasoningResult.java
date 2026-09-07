@@ -1,4 +1,4 @@
-package com.ftn.model;
+package com.ftn.dto;
 
 import java.util.ArrayList;
 import java.util.List;

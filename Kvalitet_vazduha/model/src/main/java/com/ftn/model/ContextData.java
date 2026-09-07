@@ -3,12 +3,6 @@ package com.ftn.model;
 import javax.persistence.*;
 import lombok.*;
 
-import com.ftn.model.Season;
-import com.ftn.model.TimeOfDay;
-
-import java.util.List;
-import java.util.Map;
-
 @Entity
 @Table(name = "context_data")
 @Data
@@ -22,15 +16,11 @@ public class ContextData {
     private boolean industrialActivity;
 
     @Enumerated(EnumType.STRING)
-    private TimeOfDay timeOfDay;
-
-    @Enumerated(EnumType.STRING)
     private Season season;
 
-    public ContextData(int trafficDensity, boolean industrialActivity, TimeOfDay timeOfDay, Season season) {
+    public ContextData(int trafficDensity, boolean industrialActivity, Season season) {
         this.trafficDensity = trafficDensity;
         this.industrialActivity = industrialActivity;
-        this.timeOfDay = timeOfDay;
         this.season = season;
     }
 
@@ -42,9 +32,6 @@ public class ContextData {
         return industrialActivity;
     }
 
-    public TimeOfDay getTimeOfDay() {
-        return timeOfDay;
-    }
 
     public Season getSeason() {
         return season;
@@ -58,9 +45,6 @@ public class ContextData {
         this.industrialActivity = industrialActivity;
     }
 
-    public void setTimeOfDay(TimeOfDay timeOfDay) {
-        this.timeOfDay = timeOfDay;
-    }
 
     public void setSeason(Season season) {
         this.season = season;

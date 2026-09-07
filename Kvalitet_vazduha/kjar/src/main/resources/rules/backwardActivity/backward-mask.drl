@@ -1,0 +1,2573 @@
+package rules.backwardActivity;
+
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.ftn.model.AirQualityInfo;
+import com.ftn.model.AirQualityCategory;
+import com.ftn.model.RiskType;
+import com.ftn.model.WeatherConditions;
+import com.ftn.model.ActivityType;
+
+import com.ftn.dto.BackwardActivityRequest;
+import com.ftn.dto.ActivityDiagnosisResponse;
+
+
+// =====================================================================
+// HELPER FUNCTIONS FOR EXPLANATION
+// =====================================================================
+
+/*
+ * Ove funkcije ne dokazuju hipoteze.
+ *
+ * Dokazivanje se i dalje obavlja pomoću rekurzivnog query-ja
+ * proveActivityHypothesis.
+ *
+ * Funkcije samo formiraju čitljiv prikaz jedne validne dokazne putanje
+ * koja je dovela do završnog zaključka.
+ */
+
+function String userCategoryLabel(RiskType riskType) {
+    return riskType != null
+        ? riskType.toString()
+        : "GENERAL_POPULATION";
+}
+
+
+function boolean isSensitiveUser(RiskType riskType) {
+    return riskType == RiskType.CHILD ||
+           riskType == RiskType.ELDERLY ||
+           riskType == RiskType.CHRONIC ||
+           riskType == RiskType.PREGNANT;
+}
+
+
+function boolean isNonSensitiveUser(RiskType riskType) {
+    return !isSensitiveUser(riskType);
+}
+
+
+function void addUnsafeProofPath(
+    List reasoningSteps,
+    ActivityType activityType,
+    int duration,
+    AirQualityCategory category,
+    RiskType riskType,
+    double windSpeed,
+    double humidity,
+    double temperature
+) {
+    reasoningSteps.add(
+        "LEVEL 1 - GOAL: Prove the hypothesis SelectedActivityUnsafe."
+    );
+
+    /*
+     * Najjače direktne grane imaju prioritet.
+     */
+
+    if (category == AirQualityCategory.HAZARDOUS) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- HazardousAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS: Prove HazardousAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: AirQualityInfo.airCategory = HAZARDOUS."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: HazardousAir is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: Therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    if (category == AirQualityCategory.VERY_POOR) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- VeryPoorAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS: Prove VeryPoorAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: AirQualityInfo.airCategory = VERY_POOR."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: VeryPoorAir is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: Therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    if (temperature < 0.0 || temperature > 35.0) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- ExtremeTemperature."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS: Prove ExtremeTemperature."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: WeatherConditions.temperature = " +
+            temperature + " degrees Celsius."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: ExtremeTemperature is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: Therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * Visok intenzitet i POOR ili lošiji vazduh.
+     */
+
+    if (
+        (activityType == ActivityType.RUNNING ||
+         activityType == ActivityType.OUTDOOR_FOOTBALL)
+        &&
+        (category == AirQualityCategory.POOR ||
+         category == AirQualityCategory.VERY_POOR ||
+         category == AirQualityCategory.HAZARDOUS)
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "HighIntensityActivity AND PoorOrWorseAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: Prove HighIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: BackwardActivityRequest.activityType = " +
+            activityType + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: HighIntensityActivity is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: Prove PoorOrWorseAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: AirQualityInfo.airCategory = " +
+            category + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: PoorOrWorseAir is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * Visok intenzitet, MODERATE vazduh i osetljiv korisnik.
+     */
+
+    if (
+        (activityType == ActivityType.RUNNING ||
+         activityType == ActivityType.OUTDOOR_FOOTBALL)
+        &&
+        category == AirQualityCategory.MODERATE
+        &&
+        isSensitiveUser(riskType)
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "HighIntensityActivity AND ModerateAir AND SensitiveUser."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: Prove HighIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = " + activityType + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: HighIntensityActivity is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: Prove ModerateAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = MODERATE."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: ModerateAir is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: Prove SensitiveUser."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: User risk category = " +
+            userCategoryLabel(riskType) + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: SensitiveUser is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * Visok intenzitet, MODERATE vazduh i dugo trajanje.
+     */
+
+    if (
+        (activityType == ActivityType.RUNNING ||
+         activityType == ActivityType.OUTDOOR_FOOTBALL)
+        &&
+        category == AirQualityCategory.MODERATE
+        &&
+        duration >= 60
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "HighIntensityActivity AND ModerateAir AND LongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: HighIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = " + activityType + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: ModerateAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = MODERATE."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: LongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Duration = " + duration +
+            " minutes, which is at least 60 minutes."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * NOVO: Visok intenzitet, MODERATE vazduh i vremenski uslovi koji
+     * zadržavaju zagađenje (nezavisno od osetljivosti korisnika).
+     * Ova grana je ranije nedostajala iako je deklarisana kao
+     * HypothesisDependency("SelectedActivityUnsafe",
+     * ["HighIntensityActivity","ModerateAir","PollutionTrappingWeather"]).
+     */
+
+    if (
+        (activityType == ActivityType.RUNNING ||
+         activityType == ActivityType.OUTDOOR_FOOTBALL)
+        &&
+        category == AirQualityCategory.MODERATE
+        &&
+        windSpeed < 1.5
+        &&
+        humidity > 80.0
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "HighIntensityActivity AND ModerateAir AND PollutionTrappingWeather."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: HighIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = " + activityType + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: ModerateAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = MODERATE."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: PollutionTrappingWeather."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3.1 - DEPENDENCY: PollutionTrappingWeather <- " +
+            "VeryLowWind AND HighHumidity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Wind speed = " + windSpeed +
+            " m/s, humidity = " + humidity + "%."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * Bicikl i POOR ili lošiji vazduh.
+     */
+
+    if (
+        activityType == ActivityType.CYCLING
+        &&
+        (category == AirQualityCategory.POOR ||
+         category == AirQualityCategory.VERY_POOR ||
+         category == AirQualityCategory.HAZARDOUS)
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "MediumIntensityActivity AND PoorOrWorseAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: Prove MediumIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = CYCLING."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: MediumIntensityActivity is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: Prove PoorOrWorseAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = " + category + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: PoorOrWorseAir is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: Therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * NOVO: Bicikl, MODERATE vazduh, osetljiv korisnik i dugo trajanje.
+     * Nedostajala grana za HypothesisDependency("SelectedActivityUnsafe",
+     * ["MediumIntensityActivity","ModerateAir","SensitiveUser","LongExposure"]).
+     */
+
+    if (
+        activityType == ActivityType.CYCLING
+        &&
+        category == AirQualityCategory.MODERATE
+        &&
+        isSensitiveUser(riskType)
+        &&
+        duration >= 60
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "MediumIntensityActivity AND ModerateAir AND SensitiveUser " +
+            "AND LongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: MediumIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = CYCLING."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: ModerateAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = MODERATE."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: SensitiveUser."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Risk category = " +
+            userCategoryLabel(riskType) + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 4: LongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Duration = " + duration +
+            " minutes, which is at least 60 minutes."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * NOVO: Bicikl, MODERATE vazduh i dugo trajanje (nezavisno od
+     * osetljivosti). Nedostajala grana za HypothesisDependency(
+     * "SelectedActivityUnsafe",
+     * ["MediumIntensityActivity","ModerateAir","LongExposure"]).
+     */
+
+    if (
+        activityType == ActivityType.CYCLING
+        &&
+        category == AirQualityCategory.MODERATE
+        &&
+        duration >= 60
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "MediumIntensityActivity AND ModerateAir AND LongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: MediumIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = CYCLING."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: ModerateAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = MODERATE."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: LongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Duration = " + duration +
+            " minutes, which is at least 60 minutes."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * NOVO: Bicikl, MODERATE vazduh i vremenski uslovi koji zadržavaju
+     * zagađenje. Nedostajala grana za HypothesisDependency(
+     * "SelectedActivityUnsafe",
+     * ["MediumIntensityActivity","ModerateAir","PollutionTrappingWeather"]).
+     */
+
+    if (
+        activityType == ActivityType.CYCLING
+        &&
+        category == AirQualityCategory.MODERATE
+        &&
+        windSpeed < 1.5
+        &&
+        humidity > 80.0
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "MediumIntensityActivity AND ModerateAir AND PollutionTrappingWeather."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: MediumIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = CYCLING."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: ModerateAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = MODERATE."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: PollutionTrappingWeather."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3.1 - DEPENDENCY: PollutionTrappingWeather <- " +
+            "VeryLowWind AND HighHumidity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Wind speed = " + windSpeed +
+            " m/s, humidity = " + humidity + "%."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * Nizak intenzitet, POOR vazduh i osetljiv korisnik.
+     */
+
+    if (
+        (activityType == ActivityType.DOG_WALKING ||
+         activityType == ActivityType.CASUAL_WALKING)
+        &&
+        category == AirQualityCategory.POOR
+        &&
+        isSensitiveUser(riskType)
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "LowIntensityActivity AND PoorAir AND SensitiveUser."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: LowIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = " + activityType + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: PoorAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = POOR."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: SensitiveUser."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Risk category = " +
+            userCategoryLabel(riskType) + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * Nizak intenzitet, POOR vazduh i dugo trajanje.
+     */
+
+    if (
+        (activityType == ActivityType.DOG_WALKING ||
+         activityType == ActivityType.CASUAL_WALKING)
+        &&
+        category == AirQualityCategory.POOR
+        &&
+        duration >= 60
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "LowIntensityActivity AND PoorAir AND LongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: LowIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = " + activityType + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: PoorAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = POOR."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: LongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Duration = " + duration + " minutes."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * NOVO: Nizak intenzitet, POOR vazduh i vremenski uslovi koji
+     * zadržavaju zagađenje. Nedostajala grana za HypothesisDependency(
+     * "SelectedActivityUnsafe",
+     * ["LowIntensityActivity","PoorAir","PollutionTrappingWeather"]).
+     */
+
+    if (
+        (activityType == ActivityType.DOG_WALKING ||
+         activityType == ActivityType.CASUAL_WALKING)
+        &&
+        category == AirQualityCategory.POOR
+        &&
+        windSpeed < 1.5
+        &&
+        humidity > 80.0
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "LowIntensityActivity AND PoorAir AND PollutionTrappingWeather."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: LowIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = " + activityType + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: PoorAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = POOR."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: PollutionTrappingWeather."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3.1 - DEPENDENCY: PollutionTrappingWeather <- " +
+            "VeryLowWind AND HighHumidity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Wind speed = " + windSpeed +
+            " m/s, humidity = " + humidity + "%."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * Dečje igralište.
+     */
+
+    if (
+        activityType == ActivityType.CHILD_PLAYGROUND
+        &&
+        category != AirQualityCategory.GOOD
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "ChildActivity AND ModerateOrWorseAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: ChildActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = CHILD_PLAYGROUND."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: ModerateOrWorseAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = " + category + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: Therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * NOVO: Lagana aktivnost, MODERATE vazduh, osetljiv korisnik i dugo
+     * trajanje (>=60 min). Nedostajala grana za HypothesisDependency(
+     * "SelectedActivityUnsafe",
+     * ["LowIntensityActivity","ModerateAir","SensitiveUser","LongExposure"]),
+     * različita od MediumExposure (31-59 min) grane ispod.
+     */
+
+    if (
+        (activityType == ActivityType.DOG_WALKING ||
+         activityType == ActivityType.CASUAL_WALKING)
+        &&
+        category == AirQualityCategory.MODERATE
+        &&
+        isSensitiveUser(riskType)
+        &&
+        duration >= 60
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "LowIntensityActivity AND ModerateAir AND SensitiveUser " +
+            "AND LongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: LowIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = " + activityType + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: ModerateAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = MODERATE."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: SensitiveUser."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Risk category = " +
+            userCategoryLabel(riskType) + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 4: LongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Duration = " + duration +
+            " minutes, which is at least 60 minutes."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * Lagana aktivnost, MODERATE vazduh, osetljiv korisnik
+     * i srednje trajanje (31-59 minuta).
+     */
+
+    if (
+        (activityType == ActivityType.DOG_WALKING ||
+         activityType == ActivityType.CASUAL_WALKING)
+        &&
+        category == AirQualityCategory.MODERATE
+        &&
+        isSensitiveUser(riskType)
+        &&
+        duration > 30
+        &&
+        duration < 60
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "LowIntensityActivity AND ModerateAir AND SensitiveUser " +
+            "AND MediumExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: LowIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = " + activityType + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: ModerateAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = MODERATE."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: SensitiveUser."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Risk category = " +
+            userCategoryLabel(riskType) + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 4: MediumExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Duration = " + duration +
+            " minutes, which is between 31 and 59 minutes."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * Srednji intenzitet, MODERATE vazduh, osetljiv korisnik
+     * i srednje trajanje (31-59 minuta).
+     */
+
+    if (
+        activityType == ActivityType.CYCLING
+        &&
+        category == AirQualityCategory.MODERATE
+        &&
+        isSensitiveUser(riskType)
+        &&
+        duration > 30
+        &&
+        duration < 60
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "MediumIntensityActivity AND ModerateAir AND SensitiveUser " +
+            "AND MediumExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: MediumIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = CYCLING."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: ModerateAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = MODERATE."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: SensitiveUser."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Risk category = " +
+            userCategoryLabel(riskType) + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 4: MediumExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Duration = " + duration +
+            " minutes, which is between 31 and 59 minutes."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * Vremenski uslovi koji zadržavaju zagađenje.
+     */
+
+    if (
+        category == AirQualityCategory.MODERATE
+        &&
+        isSensitiveUser(riskType)
+        &&
+        windSpeed < 1.5
+        &&
+        humidity > 80.0
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivityUnsafe <- " +
+            "ModerateAir AND SensitiveUser AND PollutionTrappingWeather."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS: PollutionTrappingWeather."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3.1 - DEPENDENCY: PollutionTrappingWeather <- " +
+            "VeryLowWind AND HighHumidity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Wind speed = " + windSpeed +
+            " m/s, which proves VeryLowWind."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Humidity = " + humidity +
+            "%, which proves HighHumidity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: PollutionTrappingWeather is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: Therefore SelectedActivityUnsafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * Rezervni prikaz ako postoji još neka validna grana.
+     */
+
+    reasoningSteps.add(
+        "LEVEL 2 - DEPENDENCY: At least one dependency path for " +
+        "SelectedActivityUnsafe was satisfied."
+    );
+
+    reasoningSteps.add(
+        "LEVEL 3 - FACTS: Activity = " + activityType +
+        ", duration = " + duration +
+        ", air category = " + category +
+        ", risk category = " + userCategoryLabel(riskType) + "."
+    );
+
+    reasoningSteps.add(
+        "LEVEL 5 - CONCLUSION: SelectedActivityUnsafe is proven."
+    );
+}
+
+
+function void addSafeProofPath(
+    List reasoningSteps,
+    ActivityType activityType,
+    int duration,
+    AirQualityCategory category,
+    RiskType riskType,
+    double windSpeed,
+    double humidity,
+    double temperature
+) {
+    reasoningSteps.add(
+        "LEVEL 1 - GOAL: Prove the hypothesis SelectedActivitySafe."
+    );
+
+    if (category == AirQualityCategory.GOOD) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivitySafe <- " +
+            "GoodAir AND AcceptableTemperature."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: Prove GoodAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: AirQualityInfo.airCategory = GOOD."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: GoodAir is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: Prove AcceptableTemperature."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Temperature = " + temperature +
+            " degrees Celsius."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: AcceptableTemperature is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivitySafe is proven."
+        );
+
+        return;
+    }
+
+    if (
+        category == AirQualityCategory.MODERATE
+        &&
+        (activityType == ActivityType.DOG_WALKING ||
+         activityType == ActivityType.CASUAL_WALKING)
+        &&
+        isNonSensitiveUser(riskType)
+        &&
+        duration < 60
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivitySafe <- " +
+            "ModerateAir AND LowIntensityActivity AND " +
+            "FavorableWeather AND NotLongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: ModerateAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = MODERATE."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: LowIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = " + activityType + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: FavorableWeather."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3.1 - DEPENDENCY: FavorableWeather <- " +
+            "AcceptableTemperature AND NormalWindOrLowHumidity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Temperature = " + temperature +
+            " degrees Celsius."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Wind speed = " + windSpeed +
+            " m/s and humidity = " + humidity + "%."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 4: NotLongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Duration = " + duration +
+            " minutes, which is less than 60 minutes."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivitySafe is proven."
+        );
+
+        return;
+    }
+
+    if (
+        category == AirQualityCategory.MODERATE
+        &&
+        (activityType == ActivityType.DOG_WALKING ||
+         activityType == ActivityType.CASUAL_WALKING)
+        &&
+        isSensitiveUser(riskType)
+        &&
+        duration > 0
+        &&
+        duration <= 30
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivitySafe <- " +
+            "ModerateAir AND LowIntensityActivity AND SensitiveUser " +
+            "AND ShortExposure AND FavorableWeather."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: ModerateAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = MODERATE."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: LowIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = " + activityType + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: SensitiveUser."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Risk category = " +
+            userCategoryLabel(riskType) + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 4: ShortExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Duration = " + duration +
+            " minutes, which is at most 30 minutes."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 5: FavorableWeather."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Temperature = " + temperature +
+            " degrees Celsius, wind speed = " + windSpeed +
+            " m/s and humidity = " + humidity + "%."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivitySafe is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * NOVO: Bicikl, MODERATE vazduh, osetljiv korisnik i kratko trajanje
+     * (<=30 min). Nedostajala grana za HypothesisDependency(
+     * "SelectedActivitySafe",
+     * ["ModerateAir","MediumIntensityActivity","SensitiveUser",
+     *  "ShortExposure","FavorableWeather"]).
+     */
+
+    if (
+        category == AirQualityCategory.MODERATE
+        &&
+        activityType == ActivityType.CYCLING
+        &&
+        isSensitiveUser(riskType)
+        &&
+        duration > 0
+        &&
+        duration <= 30
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivitySafe <- " +
+            "ModerateAir AND MediumIntensityActivity AND SensitiveUser " +
+            "AND ShortExposure AND FavorableWeather."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: ModerateAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = MODERATE."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: MediumIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = CYCLING."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: SensitiveUser."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Risk category = " +
+            userCategoryLabel(riskType) + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 4: ShortExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Duration = " + duration +
+            " minutes, which is at most 30 minutes."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 5: FavorableWeather."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Temperature = " + temperature +
+            " degrees Celsius, wind speed = " + windSpeed +
+            " m/s and humidity = " + humidity + "%."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: All prerequisites are proven; " +
+            "therefore SelectedActivitySafe is proven."
+        );
+
+        return;
+    }
+
+    if (
+        category == AirQualityCategory.MODERATE
+        &&
+        isNonSensitiveUser(riskType)
+        &&
+        duration < 60
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivitySafe <- " +
+            "ModerateAir AND ActivityIntensity AND NonSensitiveUser " +
+            "AND FavorableWeather AND NotLongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS: NonSensitiveUser."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: User.riskType = null, " +
+            "therefore the user belongs to GENERAL_POPULATION."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS: NotLongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Duration = " + duration +
+            " minutes."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: Required prerequisites are proven; " +
+            "therefore SelectedActivitySafe is proven."
+        );
+
+        return;
+    }
+
+    if (
+        category == AirQualityCategory.POOR
+        &&
+        (activityType == ActivityType.DOG_WALKING ||
+         activityType == ActivityType.CASUAL_WALKING)
+        &&
+        isNonSensitiveUser(riskType)
+        &&
+        duration < 60
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: SelectedActivitySafe <- " +
+            "PoorAir AND LowIntensityActivity AND NonSensitiveUser " +
+            "AND NotLongExposure AND FavorableWeather."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: PoorAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Air category = POOR."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: LowIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Activity type = " + activityType + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: NonSensitiveUser."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Risk category = GENERAL_POPULATION."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 4: NotLongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Duration = " + duration +
+            " minutes."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - CONCLUSION: Therefore SelectedActivitySafe is proven."
+        );
+
+        return;
+    }
+
+    reasoningSteps.add(
+        "LEVEL 2 - DEPENDENCY: At least one dependency path for " +
+        "SelectedActivitySafe was satisfied."
+    );
+
+    reasoningSteps.add(
+        "LEVEL 3 - FACTS: Activity = " + activityType +
+        ", duration = " + duration +
+        ", air category = " + category + "."
+    );
+
+    reasoningSteps.add(
+        "LEVEL 5 - CONCLUSION: SelectedActivitySafe is proven."
+    );
+}
+
+
+
+function void addStrictRestrictionProofPath(
+    List reasoningSteps,
+    ActivityType activityType,
+    int duration,
+    AirQualityCategory category,
+    RiskType riskType,
+    double temperature
+) {
+    reasoningSteps.add(
+        "LEVEL 1 - GOAL: Prove the hypothesis StrictActivityRestriction."
+    );
+
+    /*
+     * CHILD_PLAYGROUND pri VERY_POOR ili HAZARDOUS vazduhu.
+     */
+    if (
+        activityType == ActivityType.CHILD_PLAYGROUND
+        &&
+        (category == AirQualityCategory.VERY_POOR ||
+         category == AirQualityCategory.HAZARDOUS)
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: StrictActivityRestriction <- " +
+            "ChildActivity AND VeryPoorOrHazardousAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: Prove ChildActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: BackwardActivityRequest.activityType = " +
+            activityType + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: ChildActivity is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: Prove VeryPoorOrHazardousAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: AirQualityInfo.airCategory = " +
+            category + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: VeryPoorOrHazardousAir is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 6 - FINAL CONCLUSION: All prerequisites are proven; " +
+            "therefore StrictActivityRestriction is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * HAZARDOUS vazduh i aktivnost visokog intenziteta.
+     */
+    if (
+        category == AirQualityCategory.HAZARDOUS
+        &&
+        (activityType == ActivityType.RUNNING ||
+         activityType == ActivityType.OUTDOOR_FOOTBALL)
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: StrictActivityRestriction <- " +
+            "HazardousAir AND HighIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: Prove HazardousAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: AirQualityInfo.airCategory = HAZARDOUS."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: HazardousAir is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: Prove HighIntensityActivity."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: BackwardActivityRequest.activityType = " +
+            activityType + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: HighIntensityActivity is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 6 - FINAL CONCLUSION: All prerequisites are proven; " +
+            "therefore StrictActivityRestriction is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * HAZARDOUS vazduh i dugo izlaganje.
+     */
+    if (
+        category == AirQualityCategory.HAZARDOUS
+        &&
+        duration >= 60
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: StrictActivityRestriction <- " +
+            "HazardousAir AND LongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: Prove HazardousAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: AirQualityInfo.airCategory = HAZARDOUS."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: HazardousAir is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: Prove LongExposure."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: Duration = " + duration +
+            " minutes, which is at least 60 minutes."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: LongExposure is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 6 - FINAL CONCLUSION: All prerequisites are proven; " +
+            "therefore StrictActivityRestriction is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * Veoma osetljiv korisnik pri VERY_POOR ili HAZARDOUS vazduhu.
+     */
+    if (
+        (category == AirQualityCategory.VERY_POOR ||
+         category == AirQualityCategory.HAZARDOUS)
+        &&
+        (riskType == RiskType.ELDERLY ||
+         riskType == RiskType.CHRONIC)
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: StrictActivityRestriction <- " +
+            "VeryPoorOrHazardousAir AND HighlyVulnerableUser."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: Prove VeryPoorOrHazardousAir."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: AirQualityInfo.airCategory = " +
+            category + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: VeryPoorOrHazardousAir is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: Prove HighlyVulnerableUser."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: User risk category = " +
+            userCategoryLabel(riskType) + "."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: HighlyVulnerableUser is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 6 - FINAL CONCLUSION: All prerequisites are proven; " +
+            "therefore StrictActivityRestriction is proven."
+        );
+
+        return;
+    }
+
+    /*
+     * Hronični korisnik, već dokazana nebezbedna aktivnost
+     * i ekstremna temperatura.
+     */
+    if (
+        riskType == RiskType.CHRONIC
+        &&
+        (temperature < 0.0 || temperature > 35.0)
+    ) {
+        reasoningSteps.add(
+            "LEVEL 2 - DEPENDENCY: StrictActivityRestriction <- " +
+            "SelectedActivityUnsafe AND ChronicUser AND ExtremeTemperature."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 1: Prove SelectedActivityUnsafe."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - PREVIOUS PROOF: SelectedActivityUnsafe was already proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 2: Prove ChronicUser."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: User risk category = CHRONIC."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: ChronicUser is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 3 - SUB-HYPOTHESIS 3: Prove ExtremeTemperature."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 4 - BASE FACT: WeatherConditions.temperature = " +
+            temperature + " degrees Celsius."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 5 - PROOF: ExtremeTemperature is proven."
+        );
+
+        reasoningSteps.add(
+            "LEVEL 6 - FINAL CONCLUSION: All prerequisites are proven; " +
+            "therefore StrictActivityRestriction is proven."
+        );
+
+        return;
+    }
+
+    reasoningSteps.add(
+        "LEVEL 2 - DEPENDENCY: At least one dependency path for " +
+        "StrictActivityRestriction was satisfied."
+    );
+
+    reasoningSteps.add(
+        "LEVEL 3 - FACTS: Activity = " + activityType +
+        ", duration = " + duration +
+        " minutes, air category = " + category +
+        ", user category = " + userCategoryLabel(riskType) + "."
+    );
+
+    reasoningSteps.add(
+        "LEVEL 6 - FINAL CONCLUSION: StrictActivityRestriction is proven."
+    );
+}
+
+
+// =====================================================================
+// BACKWARD-CHAINING DEPENDENCY MODEL
+// =====================================================================
+
+declare HypothesisDependency
+    conclusion    : String
+    prerequisites : java.util.List
+end
+
+
+// =====================================================================
+// INITIALIZATION
+// =====================================================================
+
+rule "Initialize outdoor activity diagnosis hypotheses"
+salience 100
+when
+    not HypothesisDependency()
+then
+    System.out.println(
+        ">> Initializing backward dependencies for outdoor activity diagnosis..."
+    );
+
+
+    // =================================================================
+    // CILJ 1: SELECTED ACTIVITY IS UNSAFE
+    // =================================================================
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList("HazardousAir")
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList("VeryPoorAir")
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList("ExtremeTemperature")
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "HighIntensityActivity",
+            "PoorOrWorseAir"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "HighIntensityActivity",
+            "ModerateAir",
+            "SensitiveUser"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "HighIntensityActivity",
+            "ModerateAir",
+            "LongExposure"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "HighIntensityActivity",
+            "ModerateAir",
+            "PollutionTrappingWeather"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "MediumIntensityActivity",
+            "PoorOrWorseAir"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "MediumIntensityActivity",
+            "ModerateAir",
+            "SensitiveUser",
+            "LongExposure"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "MediumIntensityActivity",
+            "ModerateAir",
+            "LongExposure"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "MediumIntensityActivity",
+            "ModerateAir",
+            "PollutionTrappingWeather"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "LowIntensityActivity",
+            "PoorAir",
+            "SensitiveUser"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "LowIntensityActivity",
+            "PoorAir",
+            "LongExposure"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "LowIntensityActivity",
+            "PoorAir",
+            "PollutionTrappingWeather"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "LowIntensityActivity",
+            "ModerateAir",
+            "SensitiveUser",
+            "LongExposure"
+        )
+    ));
+
+    /*
+     * Osetljiv korisnik sa laganom aktivnošću pri MODERATE vazduhu
+     * može biti bezbedan najviše 30 minuta. Srednje trajanje
+     * od 31 do 59 minuta klasifikuje se kao nebezbedno.
+     */
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "LowIntensityActivity",
+            "ModerateAir",
+            "SensitiveUser",
+            "MediumExposure"
+        )
+    ));
+
+    /*
+     * Aktivnost srednjeg intenziteta pri MODERATE vazduhu za
+     * osetljivog korisnika klasifikuje se kao nebezbedna kada
+     * traje između 31 i 59 minuta.
+     */
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "MediumIntensityActivity",
+            "ModerateAir",
+            "SensitiveUser",
+            "MediumExposure"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "ModerateAir",
+            "SensitiveUser",
+            "PollutionTrappingWeather"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivityUnsafe",
+        Arrays.asList(
+            "ChildActivity",
+            "ModerateOrWorseAir"
+        )
+    ));
+
+
+    // =================================================================
+    // CILJ 2: SELECTED ACTIVITY IS SAFE
+    // =================================================================
+
+    insert(new HypothesisDependency(
+        "SelectedActivitySafe",
+        Arrays.asList(
+            "GoodAir",
+            "AcceptableTemperature"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivitySafe",
+        Arrays.asList(
+            "ModerateAir",
+            "LowIntensityActivity",
+            "NonSensitiveUser",
+            "FavorableWeather",
+            "NotLongExposure"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivitySafe",
+        Arrays.asList(
+            "ModerateAir",
+            "LowIntensityActivity",
+            "SensitiveUser",
+            "ShortExposure",
+            "FavorableWeather"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivitySafe",
+        Arrays.asList(
+            "ModerateAir",
+            "MediumIntensityActivity",
+            "NonSensitiveUser",
+            "FavorableWeather",
+            "NotLongExposure"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivitySafe",
+        Arrays.asList(
+            "ModerateAir",
+            "MediumIntensityActivity",
+            "SensitiveUser",
+            "ShortExposure",
+            "FavorableWeather"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivitySafe",
+        Arrays.asList(
+            "ModerateAir",
+            "HighIntensityActivity",
+            "NonSensitiveUser",
+            "FavorableWeather",
+            "NotLongExposure"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "SelectedActivitySafe",
+        Arrays.asList(
+            "PoorAir",
+            "LowIntensityActivity",
+            "NonSensitiveUser",
+            "NotLongExposure",
+            "FavorableWeather"
+        )
+    ));
+
+
+    // =================================================================
+    // CILJ 3: STRICT RESTRICTION
+    // =================================================================
+
+    insert(new HypothesisDependency(
+        "StrictActivityRestriction",
+        Arrays.asList(
+            "HazardousAir",
+            "HighIntensityActivity"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "StrictActivityRestriction",
+        Arrays.asList(
+            "HazardousAir",
+            "LongExposure"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "StrictActivityRestriction",
+        Arrays.asList(
+            "VeryPoorOrHazardousAir",
+            "HighlyVulnerableUser"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "StrictActivityRestriction",
+        Arrays.asList(
+            "ChildActivity",
+            "VeryPoorOrHazardousAir"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "StrictActivityRestriction",
+        Arrays.asList(
+            "SelectedActivityUnsafe",
+            "ChronicUser",
+            "ExtremeTemperature"
+        )
+    ));
+
+
+    // =================================================================
+    // POMOĆNE HIPOTEZE
+    // =================================================================
+
+    insert(new HypothesisDependency(
+        "PollutionTrappingWeather",
+        Arrays.asList(
+            "VeryLowWind",
+            "HighHumidity"
+        )
+    ));
+
+    insert(new HypothesisDependency(
+        "FavorableWeather",
+        Arrays.asList(
+            "AcceptableTemperature",
+            "NormalWindOrLowHumidity"
+        )
+    ));
+end
+
+
+// =====================================================================
+// RECURSIVE BACKWARD QUERY
+// =====================================================================
+
+query proveActivityHypothesis(String $hypothesis)
+
+    // AIR QUALITY
+
+    (
+        eval($hypothesis.equals("GoodAir"))
+        and exists AirQualityInfo(
+            airCategory == AirQualityCategory.GOOD
+        )
+    )
+    or
+
+    (
+        eval($hypothesis.equals("ModerateAir"))
+        and exists AirQualityInfo(
+            airCategory == AirQualityCategory.MODERATE
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("PoorAir"))
+        and exists AirQualityInfo(
+            airCategory == AirQualityCategory.POOR
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("VeryPoorAir"))
+        and exists AirQualityInfo(
+            airCategory == AirQualityCategory.VERY_POOR
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("HazardousAir"))
+        and exists AirQualityInfo(
+            airCategory == AirQualityCategory.HAZARDOUS
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("ModerateOrWorseAir"))
+        and exists AirQualityInfo(
+            airCategory == AirQualityCategory.MODERATE ||
+            airCategory == AirQualityCategory.POOR ||
+            airCategory == AirQualityCategory.VERY_POOR ||
+            airCategory == AirQualityCategory.HAZARDOUS
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("PoorOrWorseAir"))
+        and exists AirQualityInfo(
+            airCategory == AirQualityCategory.POOR ||
+            airCategory == AirQualityCategory.VERY_POOR ||
+            airCategory == AirQualityCategory.HAZARDOUS
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("VeryPoorOrHazardousAir"))
+        and exists AirQualityInfo(
+            airCategory == AirQualityCategory.VERY_POOR ||
+            airCategory == AirQualityCategory.HAZARDOUS
+        )
+    )
+
+
+    // ACTIVITY TYPE
+
+    or
+
+    (
+        eval($hypothesis.equals("LowIntensityActivity"))
+        and exists BackwardActivityRequest(
+            activityType == ActivityType.DOG_WALKING ||
+            activityType == ActivityType.CASUAL_WALKING
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("MediumIntensityActivity"))
+        and exists BackwardActivityRequest(
+            activityType == ActivityType.CYCLING
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("HighIntensityActivity"))
+        and exists BackwardActivityRequest(
+            activityType == ActivityType.RUNNING ||
+            activityType == ActivityType.OUTDOOR_FOOTBALL
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("ChildActivity"))
+        and exists BackwardActivityRequest(
+            activityType == ActivityType.CHILD_PLAYGROUND
+        )
+    )
+
+
+    // DURATION
+
+    or
+
+    (
+        eval($hypothesis.equals("ShortExposure"))
+        and exists BackwardActivityRequest(
+            durationMinutes > 0,
+            durationMinutes <= 30
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("MediumExposure"))
+        and exists BackwardActivityRequest(
+            durationMinutes > 30,
+            durationMinutes < 60
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("LongExposure"))
+        and exists BackwardActivityRequest(
+            durationMinutes >= 60
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("NotLongExposure"))
+        and exists BackwardActivityRequest(
+            durationMinutes > 0,
+            durationMinutes < 60
+        )
+    )
+
+
+    // USER PROFILE
+
+    or
+
+    (
+        eval($hypothesis.equals("SensitiveUser"))
+        and exists AirQualityInfo(
+            input != null,
+            input.user != null,
+            input.user.riskType in (
+                RiskType.CHILD,
+                RiskType.ELDERLY,
+                RiskType.CHRONIC,
+                RiskType.PREGNANT
+            )
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("NonSensitiveUser"))
+        and exists AirQualityInfo(
+            input != null,
+            input.user != null,
+            input.user.riskType == null
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("NonSensitiveUser"))
+        and exists AirQualityInfo(
+            input != null,
+            input.user != null,
+            input.user.riskType != null,
+            input.user.riskType not in (
+                RiskType.CHILD,
+                RiskType.ELDERLY,
+                RiskType.CHRONIC,
+                RiskType.PREGNANT
+            )
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("HighlyVulnerableUser"))
+        and exists AirQualityInfo(
+            input != null,
+            input.user != null,
+            input.user.riskType in (
+                RiskType.ELDERLY,
+                RiskType.CHRONIC
+            )
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("ChronicUser"))
+        and exists AirQualityInfo(
+            input != null,
+            input.user != null,
+            input.user.riskType == RiskType.CHRONIC
+        )
+    )
+
+
+    // WEATHER
+
+    or
+
+    (
+        eval($hypothesis.equals("VeryLowWind"))
+        and exists WeatherConditions(
+            windSpeed < 1.5
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("HighHumidity"))
+        and exists WeatherConditions(
+            humidity > 80.0
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("ExtremeTemperature"))
+        and exists WeatherConditions(
+            temperature < 0.0 ||
+            temperature > 35.0
+        )
+    )
+
+    or
+
+    (
+        eval($hypothesis.equals("AcceptableTemperature"))
+        and exists WeatherConditions(
+            temperature >= 0.0,
+            temperature <= 35.0
+        )
+    )
+    or
+    (
+        eval($hypothesis.equals("NormalWindOrLowHumidity"))
+        and exists WeatherConditions(
+            windSpeed >= 1.5 ||
+            humidity <= 80.0
+        )
+    )
+    // RECURSION
+    or
+    (
+        $dependency : HypothesisDependency(
+            conclusion == $hypothesis
+        )
+
+        and not (
+            String($prerequisite : this)
+                from $dependency.prerequisites
+
+            and not proveActivityHypothesis($prerequisite;)
+        )
+    )
+
+end
+
+
+// =====================================================================
+// UNSAFE RESULT
+// =====================================================================
+
+rule "Diagnose selected outdoor activity as unsafe"
+salience 30
+no-loop true
+when
+    proveActivityHypothesis("SelectedActivityUnsafe";)
+
+    $request : BackwardActivityRequest(
+        $activityType : activityType,
+        $duration : durationMinutes
+    )
+
+    $response : ActivityDiagnosisResponse(
+        diagnosed == false
+    )
+
+    $info : AirQualityInfo(
+        $category : airCategory,
+        input != null,
+        input.user != null,
+        $riskType : input.user.riskType
+    )
+
+    $weather : WeatherConditions(
+        $windSpeed : windSpeed,
+        $humidity : humidity,
+        $temperature : temperature
+    )
+then
+    $response.setDiagnosed(true);
+    $response.setSafe(false);
+    $response.setShouldPostpone(true);
+    $response.setStrictRestriction(false);
+    $response.setRiskLevel("HIGH");
+
+    if ($response.getReasoningSteps() == null) {
+        $response.setReasoningSteps(new ArrayList<>());
+    }
+
+    $response.getReasoningSteps().clear();
+
+    addUnsafeProofPath(
+        $response.getReasoningSteps(),
+        $activityType,
+        $duration,
+        $category,
+        $riskType,
+        $windSpeed,
+        $humidity,
+        $temperature
+    );
+
+    $response.getReasoningSteps().add(
+        "SUMMARY - Activity: " + $activityType +
+        ", duration: " + $duration +
+        " minutes, air category: " + $category +
+        ", user category: " + userCategoryLabel($riskType) + "."
+    );
+
+    if ($category == AirQualityCategory.HAZARDOUS) {
+        $response.setRiskLevel("CRITICAL");
+    }
+
+    $response.setRecommendation(
+        "Postpone the selected activity or choose a lower-intensity indoor alternative."
+    );
+
+    update($response);
+end
+
+
+// =====================================================================
+// STRICT RESTRICTION
+// =====================================================================
+
+rule "Apply strict restriction to critical activity"
+salience 20
+no-loop true
+when
+    proveActivityHypothesis("StrictActivityRestriction";)
+
+    $request : BackwardActivityRequest(
+        $activityType : activityType,
+        $duration : durationMinutes
+    )
+
+    $response : ActivityDiagnosisResponse(diagnosed == true,safe == false,strictRestriction == false)
+
+    $info : AirQualityInfo($category : airCategory,input != null,input.user != null,$riskType : input.user.riskType)
+
+    $weather : WeatherConditions(
+        $temperature : temperature
+    )
+then
+    $response.setStrictRestriction(true);
+    $response.setRiskLevel("CRITICAL");
+
+    if ($response.getReasoningSteps() == null) {
+        $response.setReasoningSteps(new ArrayList<>());
+    }
+
+    addStrictRestrictionProofPath($response.getReasoningSteps(),$activityType,$duration,$category,$riskType,$temperature);
+    $response.getReasoningSteps().add(
+        "STRICT RESTRICTION SUMMARY - Activity: " + $activityType +
+        ", duration: " + $duration +
+        " minutes, air category: " + $category +
+        ", user category: " + userCategoryLabel($riskType) + "."
+    );
+
+    $response.setRecommendation(
+        "Do not perform the selected outdoor activity under current conditions."
+    );
+
+    update($response);
+end
+
+
+// =====================================================================
+// SAFE RESULT
+// =====================================================================
+
+rule "Diagnose selected outdoor activity as safe"
+salience 10
+no-loop true
+when
+    proveActivityHypothesis("SelectedActivitySafe";)
+
+    not proveActivityHypothesis("SelectedActivityUnsafe";)
+
+    $request : BackwardActivityRequest($activityType : activityType,$duration : durationMinutes)
+
+    $response : ActivityDiagnosisResponse(diagnosed == false)
+
+    $info : AirQualityInfo($category : airCategory,input != null,input.user != null,$riskType : input.user.riskType)
+
+    $weather : WeatherConditions($windSpeed : windSpeed,$humidity : humidity,$temperature : temperature)
+then
+    $response.setDiagnosed(true);
+    $response.setSafe(true);
+    $response.setShouldPostpone(false);
+    $response.setStrictRestriction(false);
+    $response.setRiskLevel("LOW");
+
+    if ($response.getReasoningSteps() == null) {
+        $response.setReasoningSteps(new ArrayList<>());
+    }
+
+    $response.getReasoningSteps().clear();
+
+    addSafeProofPath($response.getReasoningSteps(),$activityType,$duration,$category,$riskType,$windSpeed,$humidity,$temperature);
+    $response.getReasoningSteps().add("NEGATIVE CHECK: SelectedActivityUnsafe could not be proven.");
+    $response.getReasoningSteps().add("FINAL RESULT: The selected activity is safe under current conditions.");
+    $response.setRecommendation("The selected activity is acceptable under current conditions.");
+
+    update($response);
+end
+
+
+// =====================================================================
+// INCONCLUSIVE RESULT
+// =====================================================================
+
+rule "Diagnose selected outdoor activity as inconclusive"
+salience 5
+no-loop true
+when
+    not proveActivityHypothesis("SelectedActivityUnsafe";)
+
+    not proveActivityHypothesis("SelectedActivitySafe";)
+
+    $request : BackwardActivityRequest(
+        $activityType : activityType
+    )
+
+    $response : ActivityDiagnosisResponse(
+        diagnosed == false
+    )
+then
+    $response.setDiagnosed(true);
+    $response.setSafe(false);
+    $response.setShouldPostpone(false);
+    $response.setStrictRestriction(false);
+    $response.setRiskLevel("UNKNOWN");
+
+    if ($response.getReasoningSteps() == null) {
+        $response.setReasoningSteps(new ArrayList<>());
+    }
+
+    $response.getReasoningSteps().clear();
+
+    $response.getReasoningSteps().add(
+        "LEVEL 1 - GOAL: Evaluate SelectedActivityUnsafe."
+    );
+
+    $response.getReasoningSteps().add(
+        "RESULT: No dependency path for SelectedActivityUnsafe was proven."
+    );
+
+    $response.getReasoningSteps().add(
+        "LEVEL 1 - ALTERNATIVE GOAL: Evaluate SelectedActivitySafe."
+    );
+
+    $response.getReasoningSteps().add(
+        "RESULT: No dependency path for SelectedActivitySafe was proven."
+    );
+
+    $response.getReasoningSteps().add(
+        "FINAL CONCLUSION: The available facts are insufficient " +
+        "for a reliable conclusion."
+    );
+
+    $response.setRecommendation(
+        "There is insufficient evidence for a reliable recommendation. Check the input data."
+    );
+
+    update($response);
+end

@@ -1,0 +1,28 @@
+template header
+pollutantType
+category
+minValue
+maxValue
+
+package rules.templateRules;
+
+import com.ftn.model.Pollutant;
+import com.ftn.model.PollutantType;
+import com.ftn.model.AirQualityCategory;
+import com.ftn.model.Measurement;
+
+template "pollutantThresholds"
+
+rule "Template_@{row.rowNumber}_@{pollutantType}_@{category}"
+when
+    $p : Pollutant(
+        pollutantType.name() == "@{pollutantType}",
+        value > @{minValue},
+        value <= @{maxValue}
+    )
+then
+    $p.setStatus(AirQualityCategory.valueOf("@{category}"));
+    update($p);
+end
+
+end template

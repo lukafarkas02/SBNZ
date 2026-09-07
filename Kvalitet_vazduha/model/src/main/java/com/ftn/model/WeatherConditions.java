@@ -3,8 +3,6 @@ package com.ftn.model;
 import javax.persistence.*;
 import lombok.*;
 
-import com.ftn.model.WindCategory;
-
 @Entity
 @Table(name = "weather_conditions")
 @Data
@@ -16,8 +14,6 @@ public class WeatherConditions {
     private double temperature;   // °C
     private double humidity;      // %
     private double windSpeed;     // m/s
-    @Enumerated(EnumType.STRING)
-    private WindCategory windCategory;
     private double precipitation; // mm
     private double pressure;      // hPa
 
@@ -28,6 +24,9 @@ public class WeatherConditions {
         this.windSpeed = windSpeed;
         this.precipitation = precipitation;
         this.pressure = pressure;
+    }
+
+    public WeatherConditions() {
     }
 
     // Getteri
@@ -41,10 +40,6 @@ public class WeatherConditions {
 
     public double getWindSpeed() {
         return windSpeed;
-    }
-
-    public WindCategory getWindCategory() {
-        return windCategory;
     }
 
     public double getPrecipitation() {
@@ -66,10 +61,6 @@ public class WeatherConditions {
 
     public void setWindSpeed(double windSpeed) {
         this.windSpeed = windSpeed;
-    }
-
-    public void setWindCategory(WindCategory windCategory) {
-        this.windCategory = windCategory;
     }
 
     public void setPrecipitation(double precipitation) {

@@ -1,0 +1,128 @@
+.admin-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0077b6 0%, #00b4d8 100%);
+  padding: 40px 24px;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.admin-card {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.header {
+  margin-bottom: 28px;
+}
+
+.header h2 {
+  margin: 0 0 6px;
+  color: #1a1a2e;
+}
+
+.header p {
+  margin: 0;
+  color: #888;
+}
+
+.measurement-card {
+  border: 1px solid #e2e2ea;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+  background: #fafafe;
+}
+
+.measurement-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 10px;
+}
+
+.measurement-header strong {
+  display: block;
+  color: #1a1a2e;
+}
+
+.measurement-header span {
+  display: block;
+  margin-top: 3px;
+  color: #888;
+  font-size: 13px;
+}
+
+.date {
+  color: #777;
+  font-size: 13px;
+}
+
+.location {
+  margin-bottom: 14px;
+  color: #555;
+}
+
+.pollutants {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.pollutant {
+  padding: 12px;
+  border-radius: 10px;
+  background: white;
+  border: 1px solid #e6e6ee;
+}
+
+.pollutant-name {
+  display: block;
+  font-weight: 600;
+  color: #333;
+}
+
+.pollutant-value {
+  display: block;
+  margin: 5px 0;
+  font-size: 18px;
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status.good {
+  background: #d4edda;
+  color: #207538;
+}
+
+.status.moderate {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status.poor {
+  background: #ffe0b2;
+  color: #9a4f00;
+}
+
+.status.hazardous {
+  background: #f8d7da;
+  color: #9b1c28;
+}
+
+.info {
+  color: #666;
+}
+
+.error {
+  color: #b00020;
+}

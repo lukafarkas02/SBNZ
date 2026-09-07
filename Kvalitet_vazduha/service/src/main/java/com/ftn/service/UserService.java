@@ -1,7 +1,8 @@
 package com.ftn.service;
 
 import com.ftn.model.*;
-import com.ftn.service.UserRepository;
+import com.ftn.repository.UserRepository;
+import com.ftn.dto.UserRegisterDTO;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ public class UserService {
     }
 
     public User registerUser(UserRegisterDTO dto) throws Exception {
-        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+       if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             throw new Exception("Passwords do not match");
         }
 
@@ -26,6 +27,7 @@ public class UserService {
         }
 
         User user = new User();
+
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setEmail(dto.getEmail());
@@ -33,16 +35,32 @@ public class UserService {
         user.setLocation(dto.getLocation());
 
         if (dto.getUserType().equalsIgnoreCase("citizen")) {
+
             user.setUserType(UserType.CITIZEN);
+
         } else if (dto.getUserType().equalsIgnoreCase("risk_group")) {
+
             user.setUserType(UserType.RISK_GROUP);
-            user.setRiskType(RiskType.valueOf(dto.getRiskType().toUpperCase()));
+            user.setRiskType(
+                    RiskType.valueOf(dto.getRiskType().toUpperCase())
+            );
+
         } else if (dto.getUserType().equalsIgnoreCase("institution")) {
+
             user.setUserType(UserType.INSTITUTION);
             user.setInstitutionName(dto.getInstitutionName());
-            // user.setInstitutionType(dto.getInstitutionType());
-            user.setInstitutionType(InstitutionType.valueOf(dto.getInstitutionType().toUpperCase()));
+            user.setInstitutionType(
+                    InstitutionType.valueOf(dto.getInstitutionType().toUpperCase())
+            );
             user.setInstitutionAddress(dto.getInstitutionAddress());
+
+        } else if (dto.getUserType().equalsIgnoreCase("admin")) {
+
+            user.setUserType(UserType.ADMIN);
+
+        } else {
+
+            throw new Exception("Invalid user type");
         }
 
         return userRepository.save(user);

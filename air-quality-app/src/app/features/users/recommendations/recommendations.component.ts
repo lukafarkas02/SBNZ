@@ -1,14 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import { NavigationComponent } from '../layout/navigation/navigation/navigation.component';
-import { BackwardReasoningResult } from '../core/models/backward-reasoning-result.model';
-import { MaskRecommendationResponse } from '../core/models/mask-recommendation-response.model';
-import { BackwardAnalysisService } from '../core/service/backward-analysis.service';
-import { BackwardQualityRequest } from '../core/models/backward-quality.model';
-import { SimulationStateService } from '../core/service/simulator-state.service';
-import {ActivityDiagnosisResponse} from '../core/models/activity-diagnosis-response';
-import {BackwardActivityRequest} from '../core/models/backward-activity-request';
+import { NavigationComponent } from '../../../layout/navigation/navigation/navigation.component';
+import { BackwardReasoningResult } from '../../../core/models/backward-reasoning-result.model';
+import { MaskRecommendationResponse } from '../../../core/models/mask-recommendation-response.model';
+import { BackwardAnalysisService } from '../../../core/service/backward-analysis.service';
+import { BackwardQualityRequest } from '../../../core/models/backward-quality.model';
+import { SimulationStateService } from '../../../core/service/simulator-state.service';
+import {ActivityDiagnosisResponse} from '../../../core/models/activity-diagnosis-response';
+import {BackwardActivityRequest} from '../../../core/models/backward-activity-request';
 import { FormsModule } from '@angular/forms';
 
 interface Pollutants {

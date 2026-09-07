@@ -1,4 +1,4 @@
-package com.ftn.model;
+package com.ftn.dto;
 
 import lombok.Data;
 

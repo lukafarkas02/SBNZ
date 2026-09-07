@@ -4,13 +4,13 @@ import { NgChartsModule } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { Subscription } from 'rxjs';
 
-import { NavigationComponent } from '../../layout/navigation/navigation/navigation.component';
-import { AirQualityService } from '../../core/service/air-quality.service';
-import { AirQualityInfoResponse } from '../../core/models/air-quality-info-response.model';
-import { AirQualityEvaluationResponse } from '../../core/models/AirQuilityEvaluationResponse';
-import { PollutantResponse } from '../../core/models/pollutant-response.model';
-import { AirQualityRequestDTO } from '../../core/models/air-quality-request-dto.model';
-import { SimulationStateService, SimulationData } from '../../core/service/simulator-state.service';
+import { NavigationComponent } from '../../../layout/navigation/navigation/navigation.component';
+import { AirQualityService } from '../../../core/service/air-quality.service';
+import { AirQualityInfoResponse } from '../../../core/models/air-quality-info-response.model';
+import { AirQualityEvaluationResponse } from '../../../core/models/AirQuilityEvaluationResponse';
+import { PollutantResponse } from '../../../core/models/pollutant-response.model';
+import { AirQualityRequestDTO } from '../../../core/models/air-quality-request-dto.model';
+import { SimulationStateService, SimulationData } from '../../../core/service/simulator-state.service';
 
 @Component({
   selector: 'app-dashboard',

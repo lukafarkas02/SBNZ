@@ -1,0 +1,138 @@
+<!-- template-page.component.html -->
+<app-navigation></app-navigation>
+
+<div class="template-container">
+
+  <div class="page-header">
+    <span class="page-icon">🧩</span>
+    <div>
+      <h1>Generate Template Rules</h1>
+      <p class="page-subtitle">Define pollutant thresholds — Drools generates the rules automatically</p>
+    </div>
+  </div>
+
+  <!-- BUILDER: select pollutant + edit rule rows -->
+  <div class="builder-card">
+    <div class="card-header">
+      <span class="card-icon">⚙️</span>
+      <h2>Select System (Pollutant)</h2>
+    </div>
+
+    <select class="pollutant-select" [(ngModel)]="selectedPollutant" (ngModelChange)="onPollutantChange()">
+      <option *ngFor="let type of pollutantTypes" [value]="type">{{ type }}</option>
+    </select>
+
+    <div class="rules-section" *ngIf="selectedPollutant">
+      <div class="rules-header">
+        <h3>{{ selectedPollutant }} Rules</h3>
+        <span class="rule-count-badge">{{ currentRules.length }} rule(s)</span>
+      </div>
+
+      <div class="rule-row" *ngFor="let rule of currentRules; let i = index">
+        <div class="rule-label">Rule {{ i + 1 }}</div>
+
+        <div class="rule-fields">
+          <div class="form-group">
+            <label>Category</label>
+            <select [(ngModel)]="rule.category">
+              <option *ngFor="let cat of categoryOptions" [value]="cat">{{ cat }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Min Value</label>
+            <input type="number" [(ngModel)]="rule.minValue" />
+          </div>
+
+          <div class="form-group">
+            <label>Max Value</label>
+            <input type="number" [(ngModel)]="rule.maxValue" />
+          </div>
+        </div>
+
+        <button class="remove-btn" (click)="removeRule(i)">🗑 Remove</button>
+      </div>
+
+      <div class="builder-actions">
+        <button class="secondary-btn" (click)="addRule()">+ Add Rule</button>
+        <button class="primary-btn" (click)="saveTemplate()">💾 Save Template</button>
+      </div>
+
+      <p class="save-message" *ngIf="saveMessage">{{ saveMessage }}</p>
+    </div>
+  </div>
+
+  <!-- EXPLANATION / GENERATED DRL -->
+  <div class="explanation-card">
+    <div class="card-header">
+      <span class="card-icon">💡</span>
+      <h2>How this works</h2>
+    </div>
+    <p>
+      Instead of hand-writing a separate rule for every pollutant/category combination,
+      a single <strong>.drt template</strong> defines the pattern once. Whatever you save
+      above becomes the <strong>data</strong> that fills in the template — Drools
+      recompiles the full rule set every time you save, with no code changes needed.
+    </p>
+    <button class="secondary-btn" (click)="toggleGeneratedRules()">
+      {{ showGeneratedRules ? 'Hide' : 'Show' }} the auto-generated rule text
+    </button>
+    <pre class="generated-drl" *ngIf="showGeneratedRules">{{ generatedRules }}</pre>
+  </div>
+
+  <!-- FULL TABLE OVERVIEW -->
+  <div class="threshold-card">
+    <div class="card-header">
+      <span class="card-icon">📊</span>
+      <h2>All Active Thresholds</h2>
+    </div>
+
+    <div class="pollutant-group" *ngFor="let key of pollutantKeys()">
+      <h3>{{ key }}</h3>
+      <table class="threshold-table">
+        <thead>
+        <tr>
+          <th>Category</th>
+          <th>Min</th>
+          <th>Max</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let row of groupedThresholds()[key]">
+          <td>
+            <span class="badge" [style.background]="getStatusColor(row.category)">{{ row.category }}</span>
+          </td>
+          <td>{{ row.minValue }}</td>
+          <td>{{ row.maxValue }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TEST PANEL -->
+  <div class="test-card">
+    <div class="card-header">
+      <span class="card-icon">🧪</span>
+      <h2>Try the generated rules</h2>
+    </div>
+
+    <div class="test-inputs">
+      <div class="form-group" *ngFor="let key of ['PM2_5','PM10','NO2','O3','CO2']">
+        <label>{{ key }}</label>
+        <input type="number" [(ngModel)]="testValues[key]" />
+      </div>
+    </div>
+
+    <button class="primary-btn" (click)="classify()">Classify</button>
+
+    <div class="results-grid" *ngIf="results">
+      <div class="result-item" *ngFor="let r of results">
+        <span class="result-type">{{ r.pollutantType }}</span>
+        <span class="result-value">{{ r.value }}</span>
+        <span class="badge" [style.background]="getStatusColor(r.status)">{{ r.status }}</span>
+      </div>
+    </div>
+  </div>
+
+</div>

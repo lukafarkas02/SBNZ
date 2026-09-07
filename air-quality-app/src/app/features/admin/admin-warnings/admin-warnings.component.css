@@ -1,0 +1,44 @@
+.warning-card {
+  background: #fff8f8;
+  border: 1px solid #f0cccc;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.warning-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.warning-header strong {
+  display: block;
+  color: #1a1a2e;
+}
+
+.warning-header span {
+  color: #888;
+  font-size: 13px;
+}
+
+.warning-type {
+  background: #f8d7da;
+  color: #9b1c28 !important;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.warning-content {
+  margin: 16px 0;
+  color: #444;
+}
+
+.warning-footer {
+  display: flex;
+  justify-content: space-between;
+  color: #777;
+  font-size: 13px;
+}

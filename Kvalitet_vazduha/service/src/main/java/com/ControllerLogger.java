@@ -1,4 +1,4 @@
-package com.ftn.service; // ili neki paket koji Spring skenira
+package com; // ili neki paket koji Spring skenira
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ApplicationContext;

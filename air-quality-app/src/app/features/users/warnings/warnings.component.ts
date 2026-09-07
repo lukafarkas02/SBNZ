@@ -2,10 +2,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
-import {NavigationComponent} from '../layout/navigation/navigation/navigation.component';
+import {NavigationComponent} from '../../../layout/navigation/navigation/navigation.component';
 import {LiveAlertsFeedComponent, Warning} from '../cep-alerts/live-alerts-feed/live-alerts-feed.component';
-import {SimulationData, SimulationStateService} from '../core/service/simulator-state.service';
-import {CepMeasurementRequest, CepService} from '../core/service/cep.service';
+import {SimulationData, SimulationStateService} from '../../../core/service/simulator-state.service';
+import {CepMeasurementRequest, CepService} from '../../../core/service/cep.service';
 
 
 @Component({

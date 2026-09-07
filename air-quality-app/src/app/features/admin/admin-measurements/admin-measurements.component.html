@@ -1,0 +1,80 @@
+<app-navigation></app-navigation>
+<div class="admin-container">
+
+  <div class="admin-card">
+
+    <div class="header">
+      <div>
+        <h2>All Measurements</h2>
+        <p>Overview of all air quality measurements in the system.</p>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="info">
+      Loading measurements...
+    </div>
+
+    <div *ngIf="errorMessage" class="error">
+      {{ errorMessage }}
+    </div>
+
+    <div
+      *ngIf="!loading && measurements.length === 0"
+      class="info">
+      No measurements found.
+    </div>
+
+    <div
+      class="measurement-card"
+      *ngFor="let measurement of measurements">
+
+      <div class="measurement-header">
+        <div>
+          <strong>
+            {{ measurement.userFirstName }}
+            {{ measurement.userLastName }}
+          </strong>
+
+          <span>
+            {{ measurement.userEmail }}
+          </span>
+        </div>
+
+        <div class="date">
+          {{ measurement.timestamp | date:'dd.MM.yyyy HH:mm' }}
+        </div>
+      </div>
+
+      <div class="location">
+        Location: {{ measurement.location }}
+      </div>
+
+      <div class="pollutants">
+
+        <div
+          class="pollutant"
+          *ngFor="let pollutant of measurement.pollutants">
+
+          <span class="pollutant-name">
+            {{ pollutant.pollutantType }}
+          </span>
+
+          <span class="pollutant-value">
+            {{ pollutant.value }}
+          </span>
+
+          <span
+            class="status"
+            [ngClass]="pollutant.status?.toLowerCase()">
+            {{ pollutant.status }}
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

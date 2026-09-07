@@ -1,0 +1,155 @@
+/* live-alerts-feed.component.css */
+* {
+  box-sizing: border-box;
+}
+
+.feed-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.feed-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.2rem;
+}
+
+.feed-icon {
+  font-size: 1.4rem;
+}
+
+.feed-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #1a1a2e;
+  font-weight: 700;
+  flex: 1;
+}
+
+.feed-count {
+  background: linear-gradient(135deg, #0077b6, #00b4d8);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+.feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.feed-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.feed-list::-webkit-scrollbar-thumb {
+  background: #dcdfe6;
+  border-radius: 10px;
+}
+
+.alert-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border-left: 4px solid #999;
+  background: #f8f9fb;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.alert-icon-badge {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.alert-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.alert-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 3px;
+}
+
+.alert-label {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #1a1a2e;
+}
+
+.alert-time {
+  font-size: 0.75rem;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.alert-content {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* Severity colors */
+.severity-critical {
+  border-left-color: #e53935;
+  background: #fdf0f0;
+}
+
+.severity-warning {
+  border-left-color: #f9a825;
+  background: #fffaf0;
+}
+
+.severity-early {
+  border-left-color: #9ccc65;
+  background: #f7fbf0;
+}
+
+.severity-good {
+  border-left-color: #2e7d32;
+  background: #f0f9f0;
+}
+
+.severity-info {
+  border-left-color: #0077b6;
+  background: #f0f8fc;
+}
+
+.empty-message {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  padding: 2rem 0;
+  margin: 0;
+}

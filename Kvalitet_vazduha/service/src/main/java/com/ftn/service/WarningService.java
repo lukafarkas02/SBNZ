@@ -2,8 +2,8 @@ package com.ftn.service;
 
 import com.ftn.model.messages.Warning;
 import com.ftn.model.User;
-import com.ftn.service.WarningRepository;
-import com.ftn.service.UserRepository;
+import com.ftn.repository.WarningRepository;
+import com.ftn.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
